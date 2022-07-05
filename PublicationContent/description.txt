@@ -1,0 +1,9 @@
+[h1]Custom Trader Inventory[/h1]
+
+[h1]Description[/h1]
+description will come later...
+
+[b]Mutator:[/b] CTI.CTIMut
+
+[h1]Sources[/h1]
+[url=https://github.com/GenZmeY/KF2-CustomTraderInventory]https://github.com/GenZmeY/KF2-CustomTraderInventory[/url]
