@@ -133,6 +133,10 @@ private function PostInit()
 		return;
 	}
 	
+	// TODO:
+	// replace shopContainer (KFGFxTraderContainer_Store)
+	// without replacing KFGFxMoviePlayer_Manager
+	// but how? 🤔
 	if (UnlockDLC)
 	{
 		if (KFGameInfo_VersusSurvival(KFGI) != None)

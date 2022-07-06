@@ -200,7 +200,9 @@ public reliable server function ServerSync()
 		{
 			PreloadContentWorkaround();
 		}
+		
 		SyncFinished();
+		
 		if (!CTI.DestroyRepLink(Controller(Owner)))
 		{
 			SafeDestroy();
@@ -232,6 +234,7 @@ private function PreloadContentWorkaround()
 	
 	`Log_Trace(`Location);
 
+	HideReadyButton();
 	PC = GetPlayerController();
 	
 	if (PC == None)
@@ -259,6 +262,7 @@ private function PreloadContentWorkaround()
 
 	for (Index = 0; Index < AddItems.Length; Index++)
 	{
+		HideReadyButton();
 		UpdateNotification(
 			"Game isn't frozen, Don't panic",
 			"Preload content:",
@@ -272,6 +276,7 @@ private function PreloadContentWorkaround()
 		}
 	}
 	
+	HideReadyButton();
 	UpdateNotification("Cleanup", "", "", 0);
 			
 	foreach KFIM.InventoryActors(class'Weapon', W)
@@ -288,6 +293,7 @@ private function PreloadContentWorkaround()
 		}
 	}
 	
+	HideReadyButton();
 	UpdateNotification("Cleanup", "", "", 0);
 	
 	foreach WorldInfo.DynamicActors(class'DroppedPickup', DP)
