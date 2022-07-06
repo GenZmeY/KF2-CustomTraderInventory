@@ -45,6 +45,7 @@ For example: [b]Item=WeaponPack.KFWeapDef_XM25[/b] will add [url=https://steamco
 
 [h1]Example config(s)[/h1]
 🔗 [url=https://steamcommunity.com/workshop/filedetails/discussion/2830826239/3409804177172972154/]Reinforcement Weapon Pack[/url]
+🔗 [url=https://steamcommunity.com/workshop/filedetails/discussion/2830826239/3409804177173363434/]Warface Arsenal[/url]
 
 [h1]Sources[/h1]
 [url=https://github.com/GenZmeY/KF2-CustomTraderInventory]https://github.com/GenZmeY/KF2-CustomTraderInventory[/url] (GNU GPLv3)
