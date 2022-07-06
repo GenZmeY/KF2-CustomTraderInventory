@@ -69,6 +69,10 @@ public static simulated function PreloadWeapon(class<KFWeaponDefinition> WeapDef
 	KFW = class<KFWeapon> (DynamicLoadObject(WeapDef.default.WeaponClassPath, class'Class'));
 	if (KFW != None)
 	{
+		// This doesn't seem to have any effect right now,
+		// so we're forced to use a workaround: CTI_RepInfo.PreloadContentWorkaround()
+		// But I still leave it for the future
+		// in the hope that someday we can preload weapon models using this function
 		class'KFWeapon'.static.TriggerAsyncContentLoad(KFW);
 	}
 }
