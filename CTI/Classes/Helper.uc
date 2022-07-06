@@ -52,18 +52,24 @@ public static simulated function ModifyTrader(
 	KFGRI.TraderItems = TraderItems;
 }
 
-public static function PreloadContent(Array<class<KFWeaponDefinition> > WeapDefs)
+public static simulated function PreloadContent(Array<class<KFWeaponDefinition> > WeapDefs)
+{
+	local class<KFWeaponDefinition> WeapDef;
+	
+	foreach WeapDefs(WeapDef)
+	{
+		PreloadWeapon(WeapDef);
+	}
+}
+
+public static simulated function PreloadWeapon(class<KFWeaponDefinition> WeapDef)
 {
 	local class<KFWeapon> KFW;
-	local int Index;
 	
-	for (Index = 0; Index < WeapDefs.Length; Index++)
+	KFW = class<KFWeapon> (DynamicLoadObject(WeapDef.default.WeaponClassPath, class'Class'));
+	if (KFW != None)
 	{
-		KFW = class<KFWeapon> (DynamicLoadObject(WeapDefs[Index].default.WeaponClassPath, class'Class'));
-		if (KFW != None)
-		{
-			class'KFWeapon'.static.TriggerAsyncContentLoad(KFW);
-		}
+		class'KFWeapon'.static.TriggerAsyncContentLoad(KFW);
 	}
 }
 

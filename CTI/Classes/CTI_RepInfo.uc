@@ -142,6 +142,10 @@ private reliable client function ClientSync(class<KFWeaponDefinition> WeapDef, o
 	else
 	{
 		AddItems.AddItem(WeapDef);
+		if (PreloadContent)
+		{
+			Helper.static.PreloadWeapon(WeapDef);
+		}
 	}
 	
 	Recieved = RemoveItems.Length + AddItems.Length;
@@ -176,11 +180,6 @@ private simulated reliable client function SyncFinished()
 	}
 
 	Helper.static.ModifyTrader(KFGRI, RemoveItems, AddItems, ReplaceMode);
-	
-	if (PreloadContent)
-	{
-		Helper.static.PreloadContent(AddItems);
-	}
 
 	ShowReadyButton();
 	
