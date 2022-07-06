@@ -89,9 +89,28 @@ private simulated function bool CheckPartyInGameWidget()
 	return (PartyInGameWidget != None);
 }
 
-private simulated function UpdateNotification(String Title, String Downloading, String Remainig, int Percent)
+private simulated function HideReadyButton()
 {
-	if (Notification != None)
+	if (CheckPartyInGameWidget())
+	{
+		PartyInGameWidget.SetReadyButtonVisibility(false);
+	}
+}
+
+private simulated function ShowReadyButton()
+{
+	if (CheckPartyInGameWidget())
+	{
+		Notification.SetVisible(false);
+		PartyInGameWidget.SetReadyButtonVisibility(true);
+		PartyInGameWidget.UpdateReadyButtonText();
+		PartyInGameWidget.UpdateReadyButtonVisibility();
+	}
+}
+
+private reliable client function UpdateNotification(String Title, String Downloading, String Remainig, int Percent)
+{
+	if (CheckPartyInGameWidget() && Notification != None)
 	{
 		Notification.SetString("itemName", Title);
 		Notification.SetFloat("percent", Percent);
@@ -114,10 +133,7 @@ private reliable client function ClientSync(class<KFWeaponDefinition> WeapDef, o
 		return;
 	}
 	
-	if (CheckPartyInGameWidget())
-	{
-		PartyInGameWidget.SetReadyButtonVisibility(false);
-	}
+	HideReadyButton();
 
 	if (Remove)
 	{
@@ -129,26 +145,12 @@ private reliable client function ClientSync(class<KFWeaponDefinition> WeapDef, o
 	}
 	
 	Recieved = RemoveItems.Length + AddItems.Length;
-	if (CheckPartyInGameWidget())
-	{
-		UpdateNotification(
-			"Sync items, please wait...",
-			Remove ? "-" : "+" @ Repl(String(WeapDef), "KFWeapDef_", ""),
-			Recieved @ "/" @ SyncSize,
-			(float(Recieved) / float(SyncSize)) * 100);
-	}
 	
-	if (Recieved == SyncSize && (PreloadContent || ForcePreloadContent))
-	{
-		if (CheckPartyInGameWidget())
-		{
-			UpdateNotification(
-				"Preload Content, please wait...",
-				"Game isn't frozen",
-				"Don't panic",
-				0);
-		}
-	}
+	UpdateNotification(
+		"Sync items, please wait...",
+		Remove ? "-" : "+" @ Repl(String(WeapDef), "KFWeapDef_", ""),
+		Recieved @ "/" @ SyncSize,
+		(float(Recieved) / float(SyncSize)) * 100);
 	
 	ServerSync();
 }
@@ -179,18 +181,8 @@ private simulated reliable client function SyncFinished()
 	{
 		Helper.static.PreloadContent(AddItems);
 	}
-	if (ForcePreloadContent)
-	{
-		PreloadContentWorkaround();
-	}
 
-	if (CheckPartyInGameWidget())
-	{
-		Notification.SetVisible(false);
-		PartyInGameWidget.SetReadyButtonVisibility(true);
-		PartyInGameWidget.UpdateReadyButtonText();
-		PartyInGameWidget.UpdateReadyButtonVisibility();
-	}
+	ShowReadyButton();
 	
 	SafeDestroy();
 }
@@ -205,6 +197,10 @@ public reliable server function ServerSync()
 	
 	if (SyncSize <= Recieved || WorldInfo.NetMode == NM_StandAlone)
 	{
+		if (ForcePreloadContent)
+		{
+			PreloadContentWorkaround();
+		}
 		SyncFinished();
 		if (!CTI.DestroyRepLink(Controller(Owner)))
 		{
@@ -224,7 +220,7 @@ public reliable server function ServerSync()
 	}
 }
 
-private simulated function PreloadContentWorkaround()
+private function PreloadContentWorkaround()
 {
 	local PlayerController PC;
 	local Pawn P;
@@ -264,6 +260,12 @@ private simulated function PreloadContentWorkaround()
 
 	for (Index = 0; Index < AddItems.Length; Index++)
 	{
+		UpdateNotification(
+			"Game isn't frozen, Don't panic",
+			"Preload content:",
+			Index @ "/" @ AddItems.Length,
+			(float(Index) / float(AddItems.Length)) * 100);
+		
 		CW = class<Weapon> (DynamicLoadObject(AddItems[Index].default.WeaponClassPath, class'Class'));
 		if (CW != None && Weapon(P.FindInventoryType(CW)) == None)
 		{
@@ -271,6 +273,8 @@ private simulated function PreloadContentWorkaround()
 		}
 	}
 	
+	UpdateNotification("Cleanup", "", "", 0);
+			
 	foreach KFIM.InventoryActors(class'Weapon', W)
 	{
 		if (W != None)
@@ -285,6 +289,8 @@ private simulated function PreloadContentWorkaround()
 		}
 	}
 	
+	UpdateNotification("Cleanup", "", "", 0);
+	
 	foreach WorldInfo.DynamicActors(class'DroppedPickup', DP)
 	{
 		if (DP.Instigator == P && DP.CreationTime > Time)
@@ -295,7 +301,7 @@ private simulated function PreloadContentWorkaround()
 	
 	KFIM.bInfiniteWeight = false;
 	
-	`Log_Info("Force Preload Finished");
+	`Log_Info("Force Preload Finished (" $ PC.PlayerReplicationInfo.PlayerName $ ")");
 }
 
 defaultproperties

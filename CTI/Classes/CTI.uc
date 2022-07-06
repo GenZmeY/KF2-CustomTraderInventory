@@ -133,10 +133,36 @@ private function PostInit()
 		return;
 	}
 	
-	if (UnlockDLC && KFGI.KFGFxManagerClass != class'CTI_GFxMoviePlayer_Manager')
+	if (UnlockDLC)
 	{
-		KFGI.KFGFxManagerClass = class'CTI_GFxMoviePlayer_Manager';
-		`Log_Info("DLC unlocked");
+		if (KFGameInfo_VersusSurvival(KFGI) != None)
+		{
+			if (KFGI.KFGFxManagerClass != class'CTI_GFxMoviePlayer_Manager_Versus')
+			{
+				if (KFGI.KFGFxManagerClass != class'KFGameInfo_VersusSurvival'.default.KFGFxManagerClass)
+				{
+					`Log_Warn("Found custom 'KFGFxManagerClass' (" $ KFGI.KFGFxManagerClass $ "), there may be compatibility issues");
+					`Log_Warn("If you notice problems, try disabling DLC unlock");
+				}
+				
+				KFGI.KFGFxManagerClass = class'CTI_GFxMoviePlayer_Manager_Versus';
+				`Log_Info("DLC unlocked");
+			}
+		}
+		else
+		{
+			if (KFGI.KFGFxManagerClass != class'CTI_GFxMoviePlayer_Manager')
+			{
+				if (KFGI.KFGFxManagerClass != class'KFGameInfo'.default.KFGFxManagerClass)
+				{
+					`Log_Warn("Found custom 'KFGFxManagerClass' (" $ KFGI.KFGFxManagerClass $ "), there may be compatibility issues");
+					`Log_Warn("If you notice problems, try disabling DLC unlock");
+				}
+				
+				KFGI.KFGFxManagerClass = class'CTI_GFxMoviePlayer_Manager';
+				`Log_Info("DLC unlocked");
+			}
+		}
 	}
 	
 	if (KFGI.GameReplicationInfo == None)
