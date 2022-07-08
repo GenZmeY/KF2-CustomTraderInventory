@@ -14,7 +14,6 @@ Add/Remove Items in the Trader's Inventory
 - remove and/or add items;
 - unlock DLC weapons;
 - correct items sorting (by price);
-- can preload weapon models (no lags during trader time);
 - don't have to worry about adding new guns after each Tripware update.
 
 # Usage & Setup

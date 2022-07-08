@@ -9,9 +9,8 @@ const Helper         = class'Helper';
 
 var private config int        Version;
 var private config E_LogLevel LogLevel;
-var private config bool       bPreloadContent;
-var private config bool       bForcePreloadContent;
 var private config bool       UnlockDLC;
+var private config bool       bPreloadContent;
 
 var private KFGameInfo KFGI;
 var private KFGameReplicationInfo KFGRI;
@@ -67,7 +66,6 @@ private function PreInit()
 	{
 		LogLevel = LL_Info;
 		bPreloadContent = true;
-		bForcePreloadContent = false;
 		UnlockDLC = false;
 		SaveConfig();
 	}
@@ -233,8 +231,7 @@ public function bool CreateRepLink(Controller C)
 		RemoveItems,
 		AddItems,
 		CfgRemoveItems.default.bAll,
-		bPreloadContent,
-		bForcePreloadContent);
+		bPreloadContent);
 	
 	RepInfos.AddItem(RepLink);
 	

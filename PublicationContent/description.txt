@@ -2,7 +2,6 @@
 - remove and/or add items;
 - unlock DLC weapons;
 - correct items sorting (by price);
-- can preload weapon models (no lags during trader time);
 - don't have to worry about adding new guns after each Tripware update.
 
 [h1]Whitelisted?[/h1]
@@ -29,8 +28,6 @@ No. This mod is not whitelisted and will unrank your server. Any XP gained will 
 Config will be created at the first start.
 
 Set [b]UnlockDLC=True[/b] to allow all players to buy DLC weapons.
-
-Set [b]bForcePreloadContent=True[/b] to preload weapon models and have no lags during trader time.
 
 Use [b][CTI.RemoveItems][/b] to remove items from the trader inventory.
 For example: [b]Item=KFGame.KFWeapDef_Mac10[/b] will remove MAC10 from sale.

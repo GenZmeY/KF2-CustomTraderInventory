@@ -10,11 +10,9 @@ var private Array<class<KFWeaponDefinition> > RemoveItems;
 var private Array<class<KFWeaponDefinition> > AddItems;
 var private bool ReplaceMode;
 var private bool PreloadContent;
-var private bool ForcePreloadContent;
 
 var private int  Recieved;
 var private int  SyncSize;
-var private int  Preloaded;
 
 var private KFPlayerController      KFPC;
 var private KFPawn                  KFP;
@@ -29,7 +27,7 @@ var private float                   PreloadWeaponTime;
 replication
 {
 	if (bNetInitial && Role == ROLE_Authority)
-		LogLevel, ReplaceMode, PreloadContent, ForcePreloadContent, SyncSize;
+		LogLevel, ReplaceMode, PreloadContent, SyncSize;
 }
 
 public simulated function bool SafeDestroy()
@@ -45,8 +43,7 @@ public function PrepareSync(
 	Array<class<KFWeaponDefinition> > _RemoveItems,
 	Array<class<KFWeaponDefinition> > _AddItems,
 	bool _ReplaceMode,
-	bool _PreloadContent,
-	bool _ForcePreloadContent)
+	bool _PreloadContent)
 {
 	`Log_Trace(`Location);
 	
@@ -56,7 +53,6 @@ public function PrepareSync(
 	AddItems            = _AddItems;
 	ReplaceMode         = _ReplaceMode;
 	PreloadContent      = _PreloadContent;
-	ForcePreloadContent = _ForcePreloadContent;
 	SyncSize            = RemoveItems.Length + AddItems.Length;
 }
 
@@ -74,46 +70,6 @@ private simulated function KFPlayerController GetKFPC()
 	}
 	
 	return KFPC;
-}
-
-private simulated function KFPawn GetKFP()
-{
-	local Pawn P;
-	
-	`Log_Trace(`Location);
-	
-	if (KFP != None) return KFP;
-	
-	if (GetKFPC() != None)
-	{
-		P = GetKFPC().Pawn;
-		if (P != None)
-		{
-			KFP = KFPawn(P);
-		}
-	}
-
-	return KFP;
-}
-
-private simulated function KFInventoryManager GetKFIM()
-{
-	local InventoryManager IM;
-	
-	`Log_Trace(`Location);
-	
-	if (KFIM != None) return KFIM;
-	
-	if (GetKFP() != None)
-	{
-		IM = GetKFP().InvManager;
-		if (IM != None)
-		{
-			KFIM = KFInventoryManager(IM);
-		}
-	}
-	
-	return KFIM;
 }
 
 private simulated function SetPartyInGameWidget()
@@ -223,8 +179,10 @@ private simulated reliable client function ClientSyncFinished()
 	
 	`Log_Trace(`Location);
 	
-	ClearTimer(nameof(KeepPreloadNotification)); 
-	ClearTimer(nameof(WaitForPreloadWeapon)); 
+	if (WorldInfo.GRI == None)
+	{
+		SetTimer(1.0f, false, nameof(ClientSyncFinished));
+	}
 	
 	KFGRI = KFGameReplicationInfo(WorldInfo.GRI);
 	if (KFGRI == None)
@@ -251,13 +209,11 @@ public reliable server function ServerSync()
 	
 	if (SyncSize <= Recieved || WorldInfo.NetMode == NM_StandAlone)
 	{
-		if (ForcePreloadContent)
+		ClientSyncFinished();
+	
+		if (!CTI.DestroyRepLink(Controller(Owner)))
 		{
-			ServerPreloadWeaponWorkaround();
-		}
-		else
-		{
-			ServerSyncFinished();
+			SafeDestroy();
 		}
 	}
 	else
@@ -273,145 +229,6 @@ public reliable server function ServerSync()
 	}
 }
 
-private function ServerSyncFinished()
-{
-	`Log_Trace(`Location);
-	
-	ClientSyncFinished();
-	
-	if (!CTI.DestroyRepLink(Controller(Owner)))
-	{
-		SafeDestroy();
-	}
-}
-
-private reliable server function ServerPreloadWeaponWorkaround()
-{
-	local class<Weapon> WC;
-	
-	`Log_Trace(`Location);
-	
-	RemovePreloadWeapon();
-
-	if (AddItems.Length <= Preloaded)
-	{
-		ServerSyncFinished();
-	}
-	else
-	{
-		WC = class<Weapon> (DynamicLoadObject(AddItems[Preloaded++].default.WeaponClassPath, class'Class'));
-		if (WC != None)
-		{
-			PreloadWeaponTime = WorldInfo.TimeSeconds - 1.0f;
-			PreloadWeaponClass = WC;
-			ClientPreloadWeapon(WC);
-			if (!AddPreloadWeapon(WC))
-			{
-				ServerPreloadWeaponWorkaround();
-			}
-		}
-	}
-}
-
-private reliable server function bool AddPreloadWeapon(class<Weapon> WC)
-{
-	local Weapon W;
-	
-	`Log_Trace(`Location);
-	
-	if (GetKFIM() == None || WC == None) return false;
-	
-	KFIM.bInfiniteWeight = true;
-	W = Weapon(KFP.FindInventoryType(WC));
-	if (W == None)
-	{
-		W = Weapon(KFP.CreateInventory(WC));
-	}
-	
-	if (W != None)
-	{
-		KFIM.SetCurrentWeapon(W);
-	}
-	KFIM.bInfiniteWeight = false;
-	
-	if (W == None) `Log_Warn("Can't preload" @ WC @ "for some reason (skip)");
-	
-	return (W != None);
-}
-
-private function RemovePreloadWeapon()
-{
-	local DroppedPickup DP;
-	local Weapon W;
-	
-	`Log_Trace(`Location);
-	
-	if (GetKFIM() == None || PreloadWeaponClass == None) return;
-	
-	foreach KFIM.InventoryActors(class'Weapon', W)
-	{
-		if (W != None && W.class == PreloadWeaponClass)
-		{
-			if (W.CanThrow())
-			{
-				KFP.TossInventory(W);
-				W.Destroy();
-			}
-		}
-	}
-	
-	foreach WorldInfo.DynamicActors(class'DroppedPickup', DP)
-	{
-		if (DP.Instigator == KFP && DP.CreationTime > PreloadWeaponTime)
-		{
-			DP.Destroy();
-		}
-	}
-}
-
-private reliable client function ClientPreloadWeapon(class<Weapon> WC)
-{
-	`Log_Trace(`Location);
-	
-	Preloaded++;
-	PreloadWeaponClass = WC;
-	
-	if (!IsTimerActive(nameof(KeepPreloadNotification)))
-	{
-		SetTimer(0.1f, true, nameof(KeepPreloadNotification));
-	}
-	
-	SetTimer(0.5f, false, nameof(WaitForPreloadWeapon));
-}
-
-private simulated function KeepPreloadNotification()
-{
-	HideReadyButton();
-	UpdateNotification(
-		"Preload weapon models, please wait...",
-		Repl(String(PreloadWeaponClass), "KFWeap_", ""),
-		Preloaded @ "/" @ AddItems.Length,
-		(float(Preloaded) / float(AddItems.Length)) * 100);
-}
-
-private simulated function WaitForPreloadWeapon()
-{
-	`Log_Trace(`Location);
-	
-	KeepPreloadNotification();
-	
-	if (GetKFIM() != None
-	&& KFIM.Instigator.Weapon != None
-	&& KFIM.Instigator.Weapon.Class == PreloadWeaponClass)
-	{
-		ServerPreloadWeaponWorkaround();
-	}
-	else
-	{
-		SetTimer(0.5f, false, nameof(WaitForPreloadWeapon));
-	}
-}
-
 defaultproperties
 {
 	bAlwaysRelevant               = false
@@ -420,5 +237,4 @@ defaultproperties
 	
 	PendingSync = false
 	Recieved    = 0
-	Preloaded   = 0
 }
