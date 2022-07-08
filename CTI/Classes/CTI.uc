@@ -67,7 +67,7 @@ private function PreInit()
 	{
 		LogLevel = LL_Info;
 		bPreloadContent = true;
-		bForcePreloadContent = true;
+		bForcePreloadContent = false;
 		UnlockDLC = false;
 		SaveConfig();
 	}
