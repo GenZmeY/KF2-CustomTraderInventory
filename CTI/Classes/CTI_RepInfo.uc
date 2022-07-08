@@ -223,6 +223,7 @@ private simulated reliable client function ClientSyncFinished()
 	
 	`Log_Trace(`Location);
 	
+	ClearTimer(nameof(KeepPreloadNotification)); 
 	ClearTimer(nameof(WaitForPreloadWeapon)); 
 	
 	KFGRI = KFGameReplicationInfo(WorldInfo.GRI);
@@ -374,19 +375,30 @@ private reliable client function ClientPreloadWeapon(class<Weapon> WC)
 	
 	Preloaded++;
 	PreloadWeaponClass = WC;
+	
+	if (!IsTimerActive(nameof(KeepPreloadNotification)))
+	{
+		SetTimer(0.1f, true, nameof(KeepPreloadNotification));
+	}
+	
 	SetTimer(0.5f, false, nameof(WaitForPreloadWeapon));
 }
 
-private simulated function WaitForPreloadWeapon()
+private simulated function KeepPreloadNotification()
 {
-	`Log_Trace(`Location);
-	
 	HideReadyButton();
 	UpdateNotification(
 		"Preload weapon models, please wait...",
 		Repl(String(PreloadWeaponClass), "KFWeap_", ""),
 		Preloaded @ "/" @ AddItems.Length,
 		(float(Preloaded) / float(AddItems.Length)) * 100);
+}
+
+private simulated function WaitForPreloadWeapon()
+{
+	`Log_Trace(`Location);
+	
+	KeepPreloadNotification();
 	
 	if (GetKFIM() != None
 	&& KFIM.Instigator.Weapon != None
