@@ -15,14 +15,13 @@ var private int  Recieved;
 var private int  SyncSize;
 
 var private KFPlayerController      KFPC;
-var private KFPawn                  KFP;
-var private KFInventoryManager      KFIM;
-
 var private KFGFxWidget_PartyInGame PartyInGameWidget;
 var private GFxObject               Notification;
 
-var private class<Weapon>           PreloadWeaponClass;
-var private float                   PreloadWeaponTime;
+var private String NotificationHeaderText;
+var private String NotificationLeftText;
+var private String NotificationRightText;
+var private int    NotificationPercent;
 
 replication
 {
@@ -97,7 +96,7 @@ private simulated function bool CheckPartyInGameWidget()
 	return (PartyInGameWidget != None);
 }
 
-private unreliable client function HideReadyButton()
+private simulated function HideReadyButton()
 {
 	`Log_Trace(`Location);
 	
@@ -120,7 +119,7 @@ private simulated function ShowReadyButton()
 	}
 }
 
-private unreliable client function UpdateNotification(String Title, String Downloading, String Remainig, int Percent)
+private simulated function UpdateNotification(String Title, String Downloading, String Remainig, int Percent)
 {
 	`Log_Trace(`Location);
 	
@@ -147,8 +146,11 @@ private reliable client function ClientSync(class<KFWeaponDefinition> WeapDef, o
 		return;
 	}
 	
-	HideReadyButton();
-
+	if (!IsTimerActive(nameof(KeepNotification)))
+	{
+		SetTimer(0.1f, true, nameof(KeepNotification));
+	}
+	
 	if (Remove)
 	{
 		RemoveItems.AddItem(WeapDef);
@@ -156,21 +158,28 @@ private reliable client function ClientSync(class<KFWeaponDefinition> WeapDef, o
 	else
 	{
 		AddItems.AddItem(WeapDef);
-		if (PreloadContent)
-		{
-			Helper.static.PreloadWeapon(WeapDef);
-		}
 	}
 	
 	Recieved = RemoveItems.Length + AddItems.Length;
 	
-	UpdateNotification(
-		"Sync trader items, please wait...",
-		Remove ? "-" : "+" @ Repl(String(WeapDef), "KFWeapDef_", ""),
-		Recieved @ "/" @ SyncSize,
-		(float(Recieved) / float(SyncSize)) * 100);
+	NotificationLeftText    = Remove ? "-" : "+" @ Repl(String(WeapDef), "KFWeapDef_", "");
+	NotificationRightText   = Recieved @ "/" @ SyncSize;
+	if (SyncSize != 0)
+	{
+		NotificationPercent = (float(Recieved) / float(SyncSize)) * 100;
+	}
 	
 	ServerSync();
+}
+
+private simulated function KeepNotification()
+{
+	HideReadyButton();
+	UpdateNotification(
+		NotificationHeaderText,
+		NotificationLeftText,
+		NotificationRightText,
+		NotificationPercent);
 }
 
 private simulated reliable client function ClientSyncFinished()
@@ -178,6 +187,8 @@ private simulated reliable client function ClientSyncFinished()
 	local KFGameReplicationInfo KFGRI;
 	
 	`Log_Trace(`Location);
+	
+	ClearTimer(nameof(KeepNotification)); 
 	
 	if (WorldInfo.GRI == None)
 	{
@@ -224,6 +235,7 @@ public reliable server function ServerSync()
 		}
 		else
 		{
+			if (PreloadContent) CTI.StartPreload(AddItems[Recieved]);
 			ClientSync(AddItems[Recieved++ - RemoveItems.Length], false);
 		}
 	}
@@ -237,4 +249,7 @@ defaultproperties
 	
 	PendingSync = false
 	Recieved    = 0
+	
+	NotificationHeaderText = "Sync trader items, please wait..."
+	NotificationPercent    = 0
 }

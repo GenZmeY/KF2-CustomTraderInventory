@@ -7,6 +7,14 @@ const CfgRemoveItems = class'RemoveItems';
 const CfgAddItems    = class'AddItems';
 const Helper         = class'Helper';
 
+struct S_PreloadContent
+{
+	var class<KFWeaponDefinition> KFWD;
+	var class<KFWeapon>           KFWC;
+	var KFWeapon                  KFW;
+	var KFW_Access                KFWA;
+};
+
 var private config int        Version;
 var private config E_LogLevel LogLevel;
 var private config bool       UnlockDLC;
@@ -21,6 +29,8 @@ var private Array<class<KFWeaponDefinition> > AddItems;
 var private Array<CTI_RepInfo> RepInfos;
 
 var private bool ReadyToSync;
+
+var private Array<S_PreloadContent> PreloadContent;
 
 public simulated function bool SafeDestroy()
 {
@@ -185,7 +195,7 @@ private function PostInit()
 	
 	if (bPreloadContent)
 	{
-		Helper.static.PreloadContent(AddItems);
+		InitPreload(AddItems);
 	}
 	
 	ReadyToSync = true;
@@ -195,6 +205,51 @@ private function PostInit()
 		if (RepLink.PendingSync)
 		{
 			RepLink.ServerSync();
+		}
+	}
+}
+
+private function InitPreload(Array<class<KFWeaponDefinition> > Content)
+{
+	local S_PreloadContent SPC;
+	
+	foreach Content(SPC.KFWD)
+	{
+		SPC.KFWC = class<KFWeapon> (DynamicLoadObject(SPC.KFWD.default.WeaponClassPath, class'Class'));
+		if (SPC.KFWC != None)
+		{
+			SPC.KFW = KFGI.Spawn(SPC.KFWC);
+			if (SPC.KFW == None)
+			{
+				`Log_Warn("Spawn failed:" @ SPC.KFWD.default.WeaponClassPath);
+				continue;
+			}
+			
+			SPC.KFWA = new (SPC.KFW) class'KFW_Access';
+			if (SPC.KFWA == None)
+			{
+				`Log_Warn("Spawn failed:" @ SPC.KFWD.default.WeaponClassPath @ "KFW_Access");
+				continue;
+			}
+			
+			PreloadContent.AddItem(SPC);
+		}
+	}
+	
+	`Log_Debug("PreloadContent:" @ PreloadContent.Length);
+}
+
+public function StartPreload(class<KFWeaponDefinition> KFWeapDef)
+{
+	local S_PreloadContent SPC;
+	
+	foreach PreloadContent(SPC)
+	{
+		if (SPC.KFWD == KFWeapDef)
+		{
+			SPC.KFWA.KFW_StartLoadWeaponContent();
+			`Log_Debug("Preload:" @ SPC.KFW);
+			break;
 		}
 	}
 }

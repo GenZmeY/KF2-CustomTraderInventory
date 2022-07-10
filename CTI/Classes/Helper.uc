@@ -52,30 +52,6 @@ public static simulated function ModifyTrader(
 	KFGRI.TraderItems = TraderItems;
 }
 
-public static simulated function PreloadContent(Array<class<KFWeaponDefinition> > WeapDefs)
-{
-	local class<KFWeaponDefinition> WeapDef;
-	
-	foreach WeapDefs(WeapDef)
-	{
-		PreloadWeapon(WeapDef);
-	}
-}
-
-public static simulated function PreloadWeapon(class<KFWeaponDefinition> WeapDef)
-{
-	local class<KFWeapon> KFW;
-	
-	KFW = class<KFWeapon> (DynamicLoadObject(WeapDef.default.WeaponClassPath, class'Class'));
-	if (KFW != None)
-	{
-		// This doesn't seem to have any effect right now
-		// But I still leave it for the future
-		// in the hope that someday we can preload weapon models using this function
-		class'KFWeapon'.static.TriggerAsyncContentLoad(KFW);
-	}
-}
-
 defaultproperties
 {
 	
