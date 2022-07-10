@@ -1,5 +1,6 @@
 [h1]Features[/h1]
 - remove and/or add items;
+- can preload weapon models (no lags when buying weapons);
 - unlock DLC weapons;
 - correct items sorting (by price);
 - don't have to worry about adding new guns after each Tripware update.
@@ -29,6 +30,8 @@ Config will be created at the first start.
 
 Set [b]UnlockDLC=True[/b] to allow all players to buy DLC weapons.
 
+Set [b]bPreloadContent=True[/b] to load weapon models in advance and have no lags during the game.
+
 Use [b][CTI.RemoveItems][/b] to remove items from the trader inventory.
 For example: [b]Item=KFGame.KFWeapDef_Mac10[/b] will remove MAC10 from sale.
 Set [b]bAll=True[/b] if you want to remove all items (can be useful if you want to set the entire sale list in the [b][CTI.AddItems][/b] section yourself).
@@ -44,7 +47,7 @@ For example: [b]Item=WeaponPack.KFWeapDef_XM25[/b] will add [url=https://steamco
 📌 Unlike [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2193261170]DLC Weapon Unlocker[/url], a different method is used here.
 [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2193261170]DLC Weapon Unlocker[/url] creates clones of DLC weapons and adds them to the trader. This allows you not to replace any classes in the game, so Hunter mutator has better compatibility with other mutators. However, those who have already purchased the DLC will not be able to use their skins on clones.
 CTI unlocks DLC weapons differently - it changes the trader filter allowing you to buy original DLC weapons without restrictions. Those who bought the DLC can use their skins and you don't need to update the mutator when new kf2 updates are released - unlocking will work with future weapons as well. However, when you set UnlockDLC=True CTI replaces the [b]KFGFxMoviePlayer_Manager[/b] class, so CTI may not be compatible with mods that replaces this class too. If you notice any compatibility issues, try turning off UnlockDLC.
-You can use this built-in method or add weapons from [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2193261170]DLC Weapon Unlocker[/url] - choose what suits you best.
+You can use this built-in method or add weapons from [url=https://steamcommunity.com/workshop/filedetails/discussion/2193261170/3046108212603783998]DLC Weapon Unlocker[/url] - choose what suits you best.
 
 [h1]Sources[/h1]
 [url=https://github.com/GenZmeY/KF2-CustomTraderInventory]https://github.com/GenZmeY/KF2-CustomTraderInventory[/url] (GNU GPLv3)
