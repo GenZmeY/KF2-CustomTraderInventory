@@ -87,7 +87,7 @@ private function PreInit()
 	{
 		case `NO_CONFIG:
 			`Log_Info("Config created");
-
+			
 		case MaxInt:
 			`Log_Info("Config updated to version"@LatestVersion);
 			break;
@@ -154,7 +154,7 @@ private function PostInit()
 				if (KFGI.KFGFxManagerClass != class'KFGameInfo_VersusSurvival'.default.KFGFxManagerClass)
 				{
 					`Log_Warn("Found custom 'KFGFxManagerClass' (" $ KFGI.KFGFxManagerClass $ "), there may be compatibility issues");
-					`Log_Warn("If you notice problems, try disabling DLC unlock");
+					`Log_Warn("If you notice problems, try disabling UnlockDLC");
 				}
 				
 				KFGI.KFGFxManagerClass = class'CTI_GFxMoviePlayer_Manager_Versus';
@@ -168,7 +168,7 @@ private function PostInit()
 				if (KFGI.KFGFxManagerClass != class'KFGameInfo'.default.KFGFxManagerClass)
 				{
 					`Log_Warn("Found custom 'KFGFxManagerClass' (" $ KFGI.KFGFxManagerClass $ "), there may be compatibility issues");
-					`Log_Warn("If you notice problems, try disabling DLC unlock");
+					`Log_Warn("If you notice problems, try disabling UnlockDLC");
 				}
 				
 				KFGI.KFGFxManagerClass = class'CTI_GFxMoviePlayer_Manager';

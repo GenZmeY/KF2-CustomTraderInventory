@@ -34,7 +34,7 @@ replication
 public simulated function bool SafeDestroy()
 {
 	`Log_Trace(`Location);
-	
+
 	return (bPendingDelete || bDeleteMe || Destroy());
 }
 
@@ -138,10 +138,12 @@ private simulated function UpdateNotification(String Title, String Downloading, 
 private reliable client function ClientSync(class<KFWeaponDefinition> WeapDef, optional bool Remove = false)
 {
 	`Log_Trace(`Location);
-	
+
 	if (WeapDef == None)
 	{
 		`Log_Fatal("WeapDef is:" @ WeapDef);
+		Cleanup();
+		ConsoleCommand("Disconnect");
 		SafeDestroy();
 		return;
 	}
@@ -187,12 +189,12 @@ private simulated function KeepNotification()
 private simulated reliable client function ClientSyncFinished()
 {
 	local KFGameReplicationInfo KFGRI;
-	
+
 	`Log_Trace(`Location);
 	
 	if (WorldInfo.GRI == None)
 	{
-		`Log_Debug("ClientSyncFinished: WorldInfo.GRI == None");
+		`Log_Debug("ClientSyncFinished: Waiting GRI");
 		NotificationHeaderText = "Waiting for GameReplicationInfo...";
 		NotificationLeftText   = String(++WaitingGRI) $ "s";
 		SetTimer(1.0f, false, nameof(ClientSyncFinished));
@@ -202,11 +204,13 @@ private simulated reliable client function ClientSyncFinished()
 	KFGRI = KFGameReplicationInfo(WorldInfo.GRI);
 	if (KFGRI == None)
 	{
-		`Log_Fatal("Incompatible Replication info:" @ WorldInfo.GRI);
+		`Log_Fatal("Incompatible Replication info:" @ String(WorldInfo.GRI));
 		ClearTimer(nameof(KeepNotification));
 		UpdateNotification(
-			"Error: Incompatible Replication info:" @ WorldInfo.GRI,
-			"", "", 0);
+			"Error: Incompatible Replication info:" @ String(WorldInfo.GRI),
+			"Disconnect...", "", 0);
+		Cleanup();
+		ConsoleCommand("Disconnect");
 		SafeDestroy();
 		return;
 	}
@@ -217,7 +221,21 @@ private simulated reliable client function ClientSyncFinished()
 	ClearTimer(nameof(KeepNotification)); 
 	ShowReadyButton();
 	
+	Cleanup();
+	
 	SafeDestroy();
+}
+
+private reliable server function Cleanup()
+{
+	`Log_Trace(`Location);
+	
+	`Log_Debug("Cleanup");
+	if (!CTI.DestroyRepLink(Controller(Owner)))
+	{
+		`Log_Debug("Cleanup (forced)");
+		SafeDestroy();
+	}
 }
 
 public reliable server function ServerSync()
@@ -232,13 +250,7 @@ public reliable server function ServerSync()
 	if (SyncSize <= Recieved || WorldInfo.NetMode == NM_StandAlone)
 	{
 		`Log_Debug("ServerSync: SyncFinished");
-		
 		ClientSyncFinished();
-	
-		if (!CTI.DestroyRepLink(Controller(Owner)))
-		{
-			SafeDestroy();
-		}
 	}
 	else
 	{
@@ -264,6 +276,5 @@ defaultproperties
 	
 	NotificationHeaderText = "Sync trader items, please wait..."
 	NotificationPercent    = 0
-	
 	WaitingGRI             = 0
 }
