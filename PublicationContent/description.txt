@@ -1,14 +1,16 @@
+[img]https://img.shields.io/static/v1?logo=GitHub&labelColor=gray&color=blue&logoColor=white&label=&message=Open Source[/img] [img]https://img.shields.io/github/license/GenZmeY/KF2-CustomTraderInventory[/img] [img]https://img.shields.io/steam/subscriptions/2830826239[/img] [img]https://img.shields.io/steam/favorites/2830826239[/img] [img]https://img.shields.io/steam/update-date/2830826239[/img] [url=https://steamcommunity.com/sharedfiles/filedetails/changelog/2830826239][img]https://img.shields.io/github/v/tag/GenZmeY/KF2-CustomTraderInventory[/img][/url]
+
 [h1]Features[/h1]
 [list]
 [*]remove/add items to trader;
 [*]can preload weapon models (no lags when someone buys weapons);
 [*]unlock DLC weapons;
 [*]correct items sorting (by price);
-[*]don't have to worry about adding new guns after each Tripware update.
+[*]don't have to worry about adding new guns after each KF2 update.
 [/list]
 
 [h1]Whitelisted?[/h1]
-No. This mod is not whitelisted and will unrank your server. Any XP gained will not be saved.
+No. This mod is not whitelisted and will de-rank your server. Any XP gained will not be saved.
 
 [h1]Usage (single player)[/h1]
 [olist]
