@@ -1,44 +1,48 @@
 [h1]Features[/h1]
-- remove/add items to trader;
-- can preload weapon models (no lags when someone buys weapons);
-- unlock DLC weapons;
-- correct items sorting (by price);
-- don't have to worry about adding new guns after each Tripware update.
+[list]
+[*]remove/add items to trader;
+[*]can preload weapon models (no lags when someone buys weapons);
+[*]unlock DLC weapons;
+[*]correct items sorting (by price);
+[*]don't have to worry about adding new guns after each Tripware update.
+[/list]
 
 [h1]Whitelisted?[/h1]
 No. This mod is not whitelisted and will unrank your server. Any XP gained will not be saved.
 
 [h1]Usage (single player)[/h1]
-1. Subscribe to this mutator;
-2. Start KF2; 
-3. Open console (`) and input:
+[olist]
+[*]Subscribe to this mutator;
+[*]Start KF2; 
+[*]Open console (`) and input:
 [b]open KF-BioticsLab?Mutator=CTI.CTIMut[/b]
 (replace the map and add the parameters you need)
-4. <Enter>.
-
+[*]<Enter>.
+[/olist]
 [h1]Usage (server)[/h1]
 [b]Note:[/b] [i]If you don't understand what is written here, read the article [url=https://wiki.killingfloor2.com/index.php?title=Dedicated_Server_(Killing_Floor_2)][u]Dedicated Server (KF2 wiki)[/u][/url] before following these instructions.[/i]
-
-1. Open your [b]PCServer-KFEngine.ini[/b] / [b]LinuxServer-KFEngine.ini[/b];
-2. Add the following string to the [b][OnlineSubsystemSteamworks.KFWorkshopSteamworks][/b] section (create one if it doesn't exist):
+[olist]
+[*]Open your [b]PCServer-KFEngine.ini[/b] / [b]LinuxServer-KFEngine.ini[/b];
+[*]Find the [b][IpDrv.TcpNetDriver][/b] section and make sure that there is a line (add if not):
+[b]DownloadManagers=OnlineSubsystemSteamworks.SteamWorkshopDownload[/b]
+❗️ If there are several [b]DownloadManagers=[/b] then the line above should be the first ❗️
+[*]Add the following string to the [b][OnlineSubsystemSteamworks.KFWorkshopSteamworks][/b] section (create one if it doesn't exist):
 [b]ServerSubscribedWorkshopItems=2830826239[/b]
-3. Start the server and wait while the mutator is downloading;
-4. Add mutator to server start parameters: [b]?Mutator=CTI.CTIMut[/b] and restart the server.
+[*]Start the server and wait while the mutator is downloading;
+[*]Add mutator to server start parameters: [b]?Mutator=CTI.CTIMut[/b] and restart the server.
+[/olist]
 
 [h1]Setup (KFCTI.ini)[/h1]
 Config will be created at the first start.
-
-Set [b]UnlockDLC=True[/b] to allow all players to buy DLC weapons.
-
-Set [b]bPreloadContent=True[/b] to load weapon models in advance and have no lags during the game.
-
-Use [b][CTI.RemoveItems][/b] to remove items from the trader inventory.
+[list]
+[*]Set [b]UnlockDLC=True[/b] to allow all players to buy DLC weapons.
+[*]Set [b]bPreloadContent=True[/b] to load weapon models in advance and have no lags during the game.
+[*]Use [b][CTI.RemoveItems][/b] to remove items from the trader inventory.
 For example: [b]Item=KFGame.KFWeapDef_Mac10[/b] will remove MAC10 from sale.
-Set [b]bAll=True[/b] if you want to remove all items (can be useful if you want to set the entire sale list in the [b][CTI.AddItems][/b] section yourself).
-
-Use [b][CTI.AddItems][/b] to add items to the trader inventory.
+[*]Set [b]bAll=True[/b] if you want to remove all items (can be useful if you want to set the entire sale list in the [b][CTI.AddItems][/b] section yourself).
+[*]Use [b][CTI.AddItems][/b] to add items to the trader inventory.
 For example: [b]Item=WeaponPack.KFWeapDef_XM25[/b] will add [url=https://steamcommunity.com/sharedfiles/filedetails/?id=1147408497]XM25[/url] to sale.
-
+[/list]
 [h1]🔗 [url=https://steamcommunity.com/workshop/filedetails/discussion/2830826239/3409804177172972154]Weapon Packs Items[/url][/h1]
 
 [h1]Notes[/h1]
@@ -50,4 +54,4 @@ CTI unlocks DLC weapons differently - it changes the trader filter allowing you 
 You can use this built-in method or add weapons from [url=https://steamcommunity.com/workshop/filedetails/discussion/2193261170/3046108212603783998]DLC Weapon Unlocker[/url] - choose what suits you best.
 
 [h1]Sources[/h1]
-[url=https://github.com/GenZmeY/KF2-CustomTraderInventory]https://github.com/GenZmeY/KF2-CustomTraderInventory[/url] (GNU GPLv3)
+[url=https://github.com/GenZmeY/KF2-CustomTraderInventory]https://github.com/GenZmeY/KF2-CustomTraderInventory[/url] [b](GNU GPLv3)[/b]
