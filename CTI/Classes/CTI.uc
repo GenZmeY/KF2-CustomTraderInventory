@@ -195,7 +195,7 @@ private function PostInit()
 	
 	if (bPreloadContent)
 	{
-		InitPreload(AddItems);
+		Preload(AddItems);
 	}
 	
 	ReadyToSync = true;
@@ -209,7 +209,7 @@ private function PostInit()
 	}
 }
 
-private function InitPreload(Array<class<KFWeaponDefinition> > Content)
+private function Preload(Array<class<KFWeaponDefinition> > Content)
 {
 	local S_PreloadContent SPC;
 	
@@ -236,21 +236,9 @@ private function InitPreload(Array<class<KFWeaponDefinition> > Content)
 		}
 	}
 	
-	`Log_Debug("PreloadContent:" @ PreloadContent.Length);
-}
-
-public function StartPreload(class<KFWeaponDefinition> KFWeapDef)
-{
-	local S_PreloadContent SPC;
-	
 	foreach PreloadContent(SPC)
 	{
-		if (SPC.KFWD == KFWeapDef)
-		{
-			SPC.KFWA.KFW_StartLoadWeaponContent();
-			`Log_Debug("Preload:" @ SPC.KFW);
-			break;
-		}
+		SPC.KFWA.KFW_StartLoadWeaponContent();
 	}
 }
 
@@ -285,8 +273,7 @@ public function bool CreateRepLink(Controller C)
 		LogLevel,
 		RemoveItems,
 		AddItems,
-		CfgRemoveItems.default.bAll,
-		bPreloadContent);
+		CfgRemoveItems.default.bAll);
 	
 	RepInfos.AddItem(RepLink);
 	

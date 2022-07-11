@@ -23,10 +23,12 @@ var private String NotificationLeftText;
 var private String NotificationRightText;
 var private int    NotificationPercent;
 
+var private int    WaitingGRI;
+
 replication
 {
 	if (bNetInitial && Role == ROLE_Authority)
-		LogLevel, ReplaceMode, PreloadContent, SyncSize;
+		LogLevel, ReplaceMode, SyncSize;
 }
 
 public simulated function bool SafeDestroy()
@@ -41,8 +43,7 @@ public function PrepareSync(
 	E_LogLevel _LogLevel,
 	Array<class<KFWeaponDefinition> > _RemoveItems,
 	Array<class<KFWeaponDefinition> > _AddItems,
-	bool _ReplaceMode,
-	bool _PreloadContent)
+	bool _ReplaceMode)
 {
 	`Log_Trace(`Location);
 	
@@ -51,7 +52,6 @@ public function PrepareSync(
 	RemoveItems         = _RemoveItems;
 	AddItems            = _AddItems;
 	ReplaceMode         = _ReplaceMode;
-	PreloadContent      = _PreloadContent;
 	SyncSize            = RemoveItems.Length + AddItems.Length;
 }
 
@@ -169,6 +169,8 @@ private reliable client function ClientSync(class<KFWeaponDefinition> WeapDef, o
 		NotificationPercent = (float(Recieved) / float(SyncSize)) * 100;
 	}
 	
+	`Log_Debug("ClientSync:" @ NotificationLeftText @ NotificationRightText);
+	
 	ServerSync();
 }
 
@@ -188,23 +190,31 @@ private simulated reliable client function ClientSyncFinished()
 	
 	`Log_Trace(`Location);
 	
-	ClearTimer(nameof(KeepNotification)); 
-	
 	if (WorldInfo.GRI == None)
 	{
+		`Log_Debug("ClientSyncFinished: WorldInfo.GRI == None");
+		NotificationHeaderText = "Waiting for GameReplicationInfo...";
+		NotificationLeftText   = String(++WaitingGRI) $ "s";
 		SetTimer(1.0f, false, nameof(ClientSyncFinished));
+		return;
 	}
 	
 	KFGRI = KFGameReplicationInfo(WorldInfo.GRI);
 	if (KFGRI == None)
 	{
 		`Log_Fatal("Incompatible Replication info:" @ WorldInfo.GRI);
+		ClearTimer(nameof(KeepNotification));
+		UpdateNotification(
+			"Error: Incompatible Replication info:" @ WorldInfo.GRI,
+			"", "", 0);
 		SafeDestroy();
 		return;
 	}
 
 	Helper.static.ModifyTrader(KFGRI, RemoveItems, AddItems, ReplaceMode);
+	`Log_Debug("ClientSyncFinished: Helper.static.ModifyTrader");
 
+	ClearTimer(nameof(KeepNotification)); 
 	ShowReadyButton();
 	
 	SafeDestroy();
@@ -218,8 +228,11 @@ public reliable server function ServerSync()
 	
 	if (bPendingDelete || bDeleteMe) return;
 	
+	`Log_Debug("ServerSync:" @ Recieved @ "/" @ SyncSize);
 	if (SyncSize <= Recieved || WorldInfo.NetMode == NM_StandAlone)
 	{
+		`Log_Debug("ServerSync: SyncFinished");
+		
 		ClientSyncFinished();
 	
 		if (!CTI.DestroyRepLink(Controller(Owner)))
@@ -235,7 +248,6 @@ public reliable server function ServerSync()
 		}
 		else
 		{
-			if (PreloadContent) CTI.StartPreload(AddItems[Recieved]);
 			ClientSync(AddItems[Recieved++ - RemoveItems.Length], false);
 		}
 	}
@@ -252,4 +264,6 @@ defaultproperties
 	
 	NotificationHeaderText = "Sync trader items, please wait..."
 	NotificationPercent    = 0
+	
+	WaitingGRI             = 0
 }

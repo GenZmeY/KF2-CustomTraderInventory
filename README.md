@@ -11,7 +11,7 @@
 Add/Remove Items in the Trader's Inventory  
 
 # Features
-- remove and/or add items;
+- remove/add items to trader;
 - can preload weapon models (no lags when buying weapons);
 - unlock DLC weapons;
 - correct items sorting (by price);

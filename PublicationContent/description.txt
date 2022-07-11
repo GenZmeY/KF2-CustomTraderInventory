@@ -1,5 +1,5 @@
 [h1]Features[/h1]
-- remove and/or add items;
+- remove/add items to trader;
 - can preload weapon models (no lags when someone buys weapons);
 - unlock DLC weapons;
 - correct items sorting (by price);
