@@ -231,7 +231,7 @@ private reliable server function Cleanup()
 	`Log_Trace(`Location);
 	
 	`Log_Debug("Cleanup");
-	if (!CTI.DestroyRepLink(Controller(Owner)))
+	if (!CTI.DestroyRepInfo(Controller(Owner)))
 	{
 		`Log_Debug("Cleanup (forced)");
 		SafeDestroy();

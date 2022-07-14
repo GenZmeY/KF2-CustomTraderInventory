@@ -123,7 +123,7 @@ private function PreInit()
 
 private function PostInit()
 {
-	local CTI_RepInfo RepLink;
+	local CTI_RepInfo RepInfo;
 	
 	`Log_Trace(`Location);
 	
@@ -200,11 +200,11 @@ private function PostInit()
 	
 	ReadyToSync = true;
 	
-	foreach RepInfos(RepLink)
+	foreach RepInfos(RepInfo)
 	{
-		if (RepLink.PendingSync)
+		if (RepInfo.PendingSync)
 		{
-			RepLink.ServerSync();
+			RepInfo.ServerSync();
 		}
 	}
 }
@@ -246,63 +246,63 @@ public function NotifyLogin(Controller C)
 {
 	`Log_Trace(`Location);
 
-	CreateRepLink(C);
+	CreateRepInfo(C);
 }
 
 public function NotifyLogout(Controller C)
 {
 	`Log_Trace(`Location);
 
-	DestroyRepLink(C);
+	DestroyRepInfo(C);
 }
 
-public function bool CreateRepLink(Controller C)
+public function bool CreateRepInfo(Controller C)
 {
-	local CTI_RepInfo RepLink;
+	local CTI_RepInfo RepInfo;
 	
 	`Log_Trace(`Location);
 	
 	if (C == None) return false;
 	
-	RepLink = Spawn(class'CTI_RepInfo', C);
+	RepInfo = Spawn(class'CTI_RepInfo', C);
 	
-	if (RepLink == None) return false;
+	if (RepInfo == None) return false;
 	
-	RepLink.PrepareSync(
+	RepInfo.PrepareSync(
 		Self,
 		LogLevel,
 		RemoveItems,
 		AddItems,
 		CfgRemoveItems.default.bAll);
 	
-	RepInfos.AddItem(RepLink);
+	RepInfos.AddItem(RepInfo);
 	
 	if (ReadyToSync)
 	{
-		RepLink.ServerSync();
+		RepInfo.ServerSync();
 	}
 	else
 	{
-		RepLink.PendingSync = true;
+		RepInfo.PendingSync = true;
 	}
 	
 	return true;
 }
 
-public function bool DestroyRepLink(Controller C)
+public function bool DestroyRepInfo(Controller C)
 {
-	local CTI_RepInfo RepLink;
+	local CTI_RepInfo RepInfo;
 	
 	`Log_Trace(`Location);
 	
 	if (C == None) return false;
 	
-	foreach RepInfos(RepLink)
+	foreach RepInfos(RepInfo)
 	{
-		if (RepLink.Owner == C)
+		if (RepInfo.Owner == C)
 		{
-			RepLink.SafeDestroy();
-			RepInfos.RemoveItem(RepLink);
+			RepInfo.SafeDestroy();
+			RepInfos.RemoveItem(RepInfo);
 			return true;
 		}
 	}
