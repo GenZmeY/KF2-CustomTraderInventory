@@ -1,11 +1,13 @@
 class CTI extends Info
 	config(CTI);
 
-const LatestVersion = 1;
+const LatestVersion = 2;
 
-const CfgRemoveItems = class'RemoveItems';
-const CfgAddItems    = class'AddItems';
-const Helper         = class'Helper';
+const CfgRemoveItems     = class'RemoveItems';
+const CfgAddItems        = class'AddItems';
+const CfgOfficialWeapons = class'OfficialWeapons';
+const Trader             = class'Trader';
+const Unlocker           = class'Unlocker';
 
 struct S_PreloadContent
 {
@@ -17,8 +19,9 @@ struct S_PreloadContent
 
 var private config int        Version;
 var private config E_LogLevel LogLevel;
-var private config bool       UnlockDLC;
+var private config String     UnlockDLC;
 var private config bool       bPreloadContent;
+var private config bool       bOfficialWeaponsList;
 
 var private KFGameInfo KFGI;
 var private KFGameReplicationInfo KFGRI;
@@ -34,14 +37,14 @@ var private Array<S_PreloadContent> PreloadContent;
 
 public simulated function bool SafeDestroy()
 {
-	`Log_Trace(`Location);
+	`Log_Trace();
 	
 	return (bPendingDelete || bDeleteMe || Destroy());
 }
 
 public event PreBeginPlay()
 {
-	`Log_Trace(`Location);
+	`Log_Trace();
 	
 	`Log_Debug("PreBeginPlay readyToSync" @ ReadyToSync);
 	
@@ -59,7 +62,7 @@ public event PreBeginPlay()
 
 public event PostBeginPlay()
 {
-	`Log_Trace(`Location);
+	`Log_Trace();
 	
 	if (bPendingDelete || bDeleteMe) return;
 	
@@ -70,13 +73,13 @@ public event PostBeginPlay()
 
 private function PreInit()
 {
-	`Log_Trace(`Location);
+	`Log_Trace();
 	
 	if (Version == `NO_CONFIG)
 	{
 		LogLevel = LL_Info;
 		bPreloadContent = true;
-		UnlockDLC = false;
+		UnlockDLC = "False";
 		SaveConfig();
 	}
 	
@@ -88,8 +91,11 @@ private function PreInit()
 		case `NO_CONFIG:
 			`Log_Info("Config created");
 			
+		case 1:
+			bOfficialWeaponsList = false;
+			
 		case MaxInt:
-			`Log_Info("Config updated to version"@LatestVersion);
+			`Log_Info("Config updated to version" @ LatestVersion);
 			break;
 			
 		case LatestVersion:
@@ -102,6 +108,8 @@ private function PreInit()
 			`Log_Warn("The config version will be changed to" @ LatestVersion);
 			break;
 	}
+	
+	CfgOfficialWeapons.static.Update(bOfficialWeaponsList);
 
 	if (LatestVersion != Version)
 	{
@@ -117,6 +125,13 @@ private function PreInit()
 	}
 	`Log_Base("LogLevel:" @ LogLevel);
 	
+	if (!Unlocker.static.IsValidTypeUnlockDLC(UnlockDLC, LogLevel))
+	{
+		`Log_Warn("Wrong 'UnlockDLC' (" $ UnlockDLC $ "), return to default value (False)");
+		UnlockDLC = "False";
+		SaveConfig();
+	}
+	
 	RemoveItems = CfgRemoveItems.static.Load(LogLevel);
 	AddItems    = CfgAddItems.static.Load(LogLevel);
 }
@@ -125,7 +140,7 @@ private function PostInit()
 {
 	local CTI_RepInfo RepInfo;
 	
-	`Log_Trace(`Location);
+	`Log_Trace();
 	
 	if (WorldInfo == None || WorldInfo.Game == None)
 	{
@@ -139,42 +154,6 @@ private function PostInit()
 		`Log_Fatal("Incompatible gamemode:" @ WorldInfo.Game);
 		SafeDestroy();
 		return;
-	}
-	
-	// TODO:
-	// replace shopContainer (KFGFxTraderContainer_Store)
-	// without replacing KFGFxMoviePlayer_Manager
-	// but how? 🤔
-	if (UnlockDLC)
-	{
-		if (KFGameInfo_VersusSurvival(KFGI) != None)
-		{
-			if (KFGI.KFGFxManagerClass != class'CTI_GFxMoviePlayer_Manager_Versus')
-			{
-				if (KFGI.KFGFxManagerClass != class'KFGameInfo_VersusSurvival'.default.KFGFxManagerClass)
-				{
-					`Log_Warn("Found custom 'KFGFxManagerClass' (" $ KFGI.KFGFxManagerClass $ "), there may be compatibility issues");
-					`Log_Warn("If you notice problems, try disabling UnlockDLC");
-				}
-				
-				KFGI.KFGFxManagerClass = class'CTI_GFxMoviePlayer_Manager_Versus';
-				`Log_Info("DLC unlocked");
-			}
-		}
-		else
-		{
-			if (KFGI.KFGFxManagerClass != class'CTI_GFxMoviePlayer_Manager')
-			{
-				if (KFGI.KFGFxManagerClass != class'KFGameInfo'.default.KFGFxManagerClass)
-				{
-					`Log_Warn("Found custom 'KFGFxManagerClass' (" $ KFGI.KFGFxManagerClass $ "), there may be compatibility issues");
-					`Log_Warn("If you notice problems, try disabling UnlockDLC");
-				}
-				
-				KFGI.KFGFxManagerClass = class'CTI_GFxMoviePlayer_Manager';
-				`Log_Info("DLC unlocked");
-			}
-		}
 	}
 	
 	if (KFGI.GameReplicationInfo == None)
@@ -191,12 +170,17 @@ private function PostInit()
 		return;
 	}
 	
-	Helper.static.ModifyTrader(KFGRI, RemoveItems, AddItems, CfgRemoveItems.default.bAll);
+	if (Unlocker.static.UnlockDLC(KFGI, KFGRI, UnlockDLC, RemoveItems, AddItems, LogLevel))
+	{
+		`Log_Info("DLC unlocked");
+	}
 	
 	if (bPreloadContent)
 	{
 		Preload(AddItems);
 	}
+	
+	Trader.static.ModifyTrader(KFGRI, RemoveItems, AddItems, CfgRemoveItems.default.bAll, LogLevel);
 	
 	ReadyToSync = true;
 	
@@ -211,13 +195,24 @@ private function PostInit()
 
 private function Preload(Array<class<KFWeaponDefinition> > Content)
 {
+	local Array<class<KFWeapon> > OfficialWeapons;
 	local S_PreloadContent SPC;
+	
+	`Log_Trace();
+	
+	OfficialWeapons = Trader.static.GetTraderWeapons();
 	
 	foreach Content(SPC.KFWD)
 	{
 		SPC.KFWC = class<KFWeapon> (DynamicLoadObject(SPC.KFWD.default.WeaponClassPath, class'Class'));
 		if (SPC.KFWC != None)
 		{
+			if (OfficialWeapons.Find(SPC.KFWC) != INDEX_NONE)
+			{
+				`Log_Debug("Skip preload:" @ SPC.KFWD.GetPackageName() $ "." $ SPC.KFWD);
+				continue;
+			}
+		
 			SPC.KFW = KFGI.Spawn(SPC.KFWC);
 			if (SPC.KFW == None)
 			{
@@ -240,18 +235,20 @@ private function Preload(Array<class<KFWeaponDefinition> > Content)
 	{
 		SPC.KFWA.KFW_StartLoadWeaponContent();
 	}
+	
+	`Log_Info("Preloaded" @ PreloadContent.Length @ "weapon models");
 }
 
 public function NotifyLogin(Controller C)
 {
-	`Log_Trace(`Location);
+	`Log_Trace();
 
 	CreateRepInfo(C);
 }
 
 public function NotifyLogout(Controller C)
 {
-	`Log_Trace(`Location);
+	`Log_Trace();
 
 	DestroyRepInfo(C);
 }
@@ -260,7 +257,7 @@ public function bool CreateRepInfo(Controller C)
 {
 	local CTI_RepInfo RepInfo;
 	
-	`Log_Trace(`Location);
+	`Log_Trace();
 	
 	if (C == None) return false;
 	
@@ -293,7 +290,7 @@ public function bool DestroyRepInfo(Controller C)
 {
 	local CTI_RepInfo RepInfo;
 	
-	`Log_Trace(`Location);
+	`Log_Trace();
 	
 	if (C == None) return false;
 	

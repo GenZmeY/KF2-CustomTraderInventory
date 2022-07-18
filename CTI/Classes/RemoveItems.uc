@@ -31,7 +31,8 @@ private static function ApplyDefault()
 public static function Array<class<KFWeaponDefinition> > Load(E_LogLevel LogLevel)
 {
 	local Array<class<KFWeaponDefinition> > ItemList;
-	local class<KFWeaponDefinition> ItemClass;
+	local class<KFWeaponDefinition> ItemWeapDef;
+	local class<KFWeapon> ItemWeapon;
 	local String ItemRaw;
 	local int    Line;
 	
@@ -44,21 +45,33 @@ public static function Array<class<KFWeaponDefinition> > Load(E_LogLevel LogLeve
 	{
 		foreach default.Item(ItemRaw, Line)
 		{
-			ItemClass = class<KFWeaponDefinition>(DynamicLoadObject(ItemRaw, class'Class'));
-			if (ItemClass == None)
+			ItemWeapDef = class<KFWeaponDefinition>(DynamicLoadObject(ItemRaw, class'Class'));
+			if (ItemWeapDef == None)
 			{
-				`Log_Warn("[" $ Line + 1 $ "]" @ "Can't load item class:" @ ItemRaw);
+				`Log_Warn("[" $ Line + 1 $ "]" @ "Can't load weapon definition:" @ ItemRaw);
+				continue;
 			}
-			else
+			
+			ItemWeapon = class<KFWeapon>(DynamicLoadObject(ItemWeapDef.default.WeaponClassPath, class'Class'));
+			if (ItemWeapon == None)
 			{
-				ItemList.AddItem(ItemClass);
-				`Log_Debug("[" $ Line + 1 $ "]" @ "Loaded successfully:" @ ItemRaw);
+				`Log_Warn("[" $ Line + 1 $ "]" @ "Can't load weapon:" @ ItemWeapDef.default.WeaponClassPath);
+				continue;
 			}
+			
+			if (ItemList.Find(ItemWeapDef) != INDEX_NONE)
+			{
+				`Log_Warn("[" $ Line + 1 $ "]" @ "Duplicate item:" @ ItemRaw @ "(skip)");
+				continue;
+			}
+			
+			ItemList.AddItem(ItemWeapDef);
+			`Log_Debug("[" $ Line + 1 $ "]" @ "Loaded successfully:" @ ItemRaw);
 		}
 		
 		if (ItemList.Length == default.Item.Length)
 		{
-			`Log_Info("Items to remove list loaded successfully (" $ default.Item.Length @ "entries)");
+			`Log_Info("Items to remove list loaded successfully (" $ ItemList.Length @ "entries)");
 		}
 		else
 		{

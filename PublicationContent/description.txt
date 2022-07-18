@@ -37,8 +37,13 @@ No. This mod is not whitelisted and will de-rank your server. Any XP gained will
 [h1]Setup (KFCTI.ini)[/h1]
 Config will be created at the first start.
 [list]
-[*]Set [b]UnlockDLC=True[/b] to allow all players to buy DLC weapons.
 [*]Set [b]bPreloadContent=True[/b] to load weapon models in advance and have no lags during the game.
+[*]Set [b]bOfficialWeaponsList=True[/b] to have an auto-updated list of all official weapons in the config (for a convenient copy-paste).
+[*]Set [b]UnlockDLC[/b] to customize DLC weapon unlocks. Here are the possible values:
+[b]False[/b] - disable DLC unlock.
+[b]ReplaceFilter[/b] - changes the trader filter allowing you to buy original DLC weapons without restrictions, unlocks future DLCs as well (no need to update this mutator). However, it replaces the [b]KFGFxMoviePlayer_Manager[/b] class so it may not be compatible with mods that also replace it.
+[b]ReplaceWeapons[/b] - replaces DLC weapons with their unlocked variants. Compatible with any mods, but may require a CTI update after the release of new DLC weapons.
+[b]True[/b] or [b]Auto[/b] - selects the most appropriate option automatically. Recommend putting CTIMut last in the mutator load queue if you use this.
 [*]Use [b][CTI.RemoveItems][/b] to remove items from the trader inventory.
 For example: [b]Item=KFGame.KFWeapDef_Mac10[/b] will remove MAC10 from sale.
 [*]Set [b]bAll=True[/b] if you want to remove all items (can be useful if you want to set the entire sale list in the [b][CTI.AddItems][/b] section yourself).
@@ -50,10 +55,6 @@ For example: [b]Item=WeaponPack.KFWeapDef_XM25[/b] will add [url=https://steamco
 [h1]Notes[/h1]
 📌 Mutator does not contain custom weapons. You must have the required weapon packs in your subscriptions to be able to add them to the trader.
 📌 If you are using this mutator to add weapons, you should [b]not[/b] use mutators from weapon packs (just having them in subscriptions is enough).
-📌 Unlike [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2193261170]DLC Weapon Unlocker[/url], a different method is used here.
-[url=https://steamcommunity.com/sharedfiles/filedetails/?id=2193261170]DLC Weapon Unlocker[/url] creates clones of DLC weapons and adds them to the trader. This allows you not to replace any classes in the game, so Hunter mutator has better compatibility with other mutators, however you need to update DWU every time kf2 update comes out with new guns.
-CTI unlocks DLC weapons differently - it changes the trader filter allowing you to buy original DLC weapons without restrictions. You don't need to update the mutator when new kf2 updates are released - unlocking will work with future weapons as well. However, when you set UnlockDLC=True CTI replaces the [b]KFGFxMoviePlayer_Manager[/b] class, so CTI may not be compatible with mods that replaces this class too. If you notice any compatibility issues, try turning off UnlockDLC.
-You can use this built-in method or add weapons from [url=https://steamcommunity.com/workshop/filedetails/discussion/2193261170/3046108212603783998]DLC Weapon Unlocker[/url] - choose what suits you best.
 
 [h1]Sources[/h1]
 [url=https://github.com/GenZmeY/KF2-CustomTraderInventory]https://github.com/GenZmeY/KF2-CustomTraderInventory[/url] [b](GNU GPLv3)[/b]

@@ -1,6 +1,6 @@
 class CTI_RepInfo extends ReplicationInfo;
 
-const Helper = class'Helper';
+const Trader = class'Trader';
 
 var public  bool PendingSync;
 
@@ -33,7 +33,7 @@ replication
 
 public simulated function bool SafeDestroy()
 {
-	`Log_Trace(`Location);
+	`Log_Trace();
 
 	return (bPendingDelete || bDeleteMe || Destroy());
 }
@@ -45,7 +45,7 @@ public function PrepareSync(
 	Array<class<KFWeaponDefinition> > _AddItems,
 	bool _ReplaceMode)
 {
-	`Log_Trace(`Location);
+	`Log_Trace();
 	
 	CTI                 = _CTI;
 	LogLevel            = _LogLevel;
@@ -57,7 +57,7 @@ public function PrepareSync(
 
 private simulated function KFPlayerController GetKFPC()
 {
-	`Log_Trace(`Location);
+	`Log_Trace();
 	
 	if (KFPC != None) return KFPC;
 	
@@ -73,7 +73,7 @@ private simulated function KFPlayerController GetKFPC()
 
 private simulated function SetPartyInGameWidget()
 {
-	`Log_Trace(`Location);
+	`Log_Trace();
 	
 	if (GetKFPC() == None) return;
 	
@@ -86,7 +86,7 @@ private simulated function SetPartyInGameWidget()
 
 private simulated function bool CheckPartyInGameWidget()
 {
-	`Log_Trace(`Location);
+	`Log_Trace();
 	
 	if (PartyInGameWidget == None)
 	{
@@ -98,7 +98,7 @@ private simulated function bool CheckPartyInGameWidget()
 
 private simulated function HideReadyButton()
 {
-	`Log_Trace(`Location);
+	`Log_Trace();
 	
 	if (CheckPartyInGameWidget())
 	{
@@ -108,7 +108,7 @@ private simulated function HideReadyButton()
 
 private simulated function ShowReadyButton()
 {
-	`Log_Trace(`Location);
+	`Log_Trace();
 	
 	if (CheckPartyInGameWidget())
 	{
@@ -121,7 +121,7 @@ private simulated function ShowReadyButton()
 
 private simulated function UpdateNotification(String Title, String Downloading, String Remainig, int Percent)
 {
-	`Log_Trace(`Location);
+	`Log_Trace();
 	
 	if (CheckPartyInGameWidget() && Notification != None)
 	{
@@ -137,7 +137,7 @@ private simulated function UpdateNotification(String Title, String Downloading, 
 
 private reliable client function ClientSync(class<KFWeaponDefinition> WeapDef, optional bool Remove = false)
 {
-	`Log_Trace(`Location);
+	`Log_Trace();
 
 	if (WeapDef == None)
 	{
@@ -164,14 +164,14 @@ private reliable client function ClientSync(class<KFWeaponDefinition> WeapDef, o
 	
 	Recieved = RemoveItems.Length + AddItems.Length;
 	
-	NotificationLeftText    = Remove ? "-" : "+" @ Repl(String(WeapDef), "KFWeapDef_", "");
-	NotificationRightText   = Recieved @ "/" @ SyncSize;
+	NotificationLeftText    = WeapDef.static.GetItemName();
+	NotificationRightText   = Recieved @ "/" @ SyncSize @ "(" $ (Remove ? "remove" : "add") $ ")";
 	if (SyncSize != 0)
 	{
 		NotificationPercent = (float(Recieved) / float(SyncSize)) * 100;
 	}
 	
-	`Log_Debug("ClientSync:" @ NotificationLeftText @ NotificationRightText);
+	`Log_Debug("ClientSync:" @ (Remove ? "-" : "+") @ String(WeapDef) @ NotificationRightText);
 	
 	ServerSync();
 }
@@ -190,13 +190,18 @@ private simulated reliable client function ClientSyncFinished()
 {
 	local KFGameReplicationInfo KFGRI;
 
-	`Log_Trace(`Location);
+	`Log_Trace();
+	
+	NotificationLeftText  = "";
+	NotificationRightText = "";
+	NotificationPercent   = 0;
 	
 	if (WorldInfo.GRI == None)
 	{
 		`Log_Debug("ClientSyncFinished: Waiting GRI");
 		NotificationHeaderText = "Waiting for GameReplicationInfo...";
 		NotificationLeftText   = String(++WaitingGRI) $ "s";
+		NotificationRightText  = "";
 		SetTimer(1.0f, false, nameof(ClientSyncFinished));
 		return;
 	}
@@ -207,16 +212,21 @@ private simulated reliable client function ClientSyncFinished()
 		`Log_Fatal("Incompatible Replication info:" @ String(WorldInfo.GRI));
 		ClearTimer(nameof(KeepNotification));
 		UpdateNotification(
-			"Error: Incompatible Replication info:" @ String(WorldInfo.GRI),
+			"Incompatible GRI:" @ String(WorldInfo.GRI),
 			"Disconnect...", "", 0);
 		Cleanup();
 		ConsoleCommand("Disconnect");
 		SafeDestroy();
 		return;
 	}
+	
+	NotificationHeaderText = "Sync finished";
+	NotificationLeftText   = "";
+	NotificationRightText  = "";
+	NotificationPercent    = 0;
 
-	Helper.static.ModifyTrader(KFGRI, RemoveItems, AddItems, ReplaceMode);
-	`Log_Debug("ClientSyncFinished: Helper.static.ModifyTrader");
+	Trader.static.ModifyTrader(KFGRI, RemoveItems, AddItems, ReplaceMode, LogLevel);
+	`Log_Debug("ClientSyncFinished: Trader.static.ModifyTrader");
 
 	ClearTimer(nameof(KeepNotification)); 
 	ShowReadyButton();
@@ -228,7 +238,7 @@ private simulated reliable client function ClientSyncFinished()
 
 private reliable server function Cleanup()
 {
-	`Log_Trace(`Location);
+	`Log_Trace();
 	
 	`Log_Debug("Cleanup");
 	if (!CTI.DestroyRepInfo(Controller(Owner)))
@@ -240,26 +250,27 @@ private reliable server function Cleanup()
 
 public reliable server function ServerSync()
 {
-	`Log_Trace(`Location);
+	`Log_Trace();
 	
 	PendingSync = false;
 	
 	if (bPendingDelete || bDeleteMe) return;
 	
-	`Log_Debug("ServerSync:" @ Recieved @ "/" @ SyncSize);
 	if (SyncSize <= Recieved || WorldInfo.NetMode == NM_StandAlone)
 	{
-		`Log_Debug("ServerSync: SyncFinished");
+		`Log_Debug("ServerSync: Finished");
 		ClientSyncFinished();
 	}
 	else
 	{
 		if (Recieved < RemoveItems.Length)
 		{
+			`Log_Debug("ServerSync[-]:" @ (Recieved + 1) @ "/" @ SyncSize @ RemoveItems[Recieved]);
 			ClientSync(RemoveItems[Recieved++], true);
 		}
 		else
 		{
+			`Log_Debug("ServerSync[+]:" @ (Recieved + 1) @ "/" @ SyncSize @ AddItems[Recieved - RemoveItems.Length]);
 			ClientSync(AddItems[Recieved++ - RemoveItems.Length], false);
 		}
 	}
