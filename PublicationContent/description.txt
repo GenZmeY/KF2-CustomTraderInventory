@@ -38,17 +38,24 @@ No. This mod is not whitelisted and will de-rank your server. Any XP gained will
 Config will be created at the first start.
 [list]
 [*]Set [b]bPreloadContent=True[/b] to load weapon models in advance and have no lags during the game.
+
 [*]Set [b]bOfficialWeaponsList=True[/b] to have an auto-updated list of all official weapons in the config (for a convenient copy-paste).
+
 [*]Set [b]UnlockDLC[/b] to customize DLC weapon unlocks. Here are the possible values:
-[b]False[/b] - disable DLC unlock.
-[b]ReplaceFilter[/b] - changes the trader filter allowing you to buy original DLC weapons without restrictions, unlocks future DLCs as well (no need to update this mutator). However, it replaces the [b]KFGFxMoviePlayer_Manager[/b] class so it may not be compatible with mods that also replace it.
-[b]ReplaceWeapons[/b] - replaces DLC weapons with their unlocked variants. Compatible with any mods, but may require a CTI update after the release of new DLC weapons.
-[b]True[/b] or [b]Auto[/b] - selects the most appropriate option automatically. Recommend putting CTIMut last in the mutator load queue if you use this.
+[list]
+[*][b]False[/b] - disable DLC unlock.
+[*][b]ReplaceFilter[/b] - changes the trader filter allowing you to buy original DLC weapons without restrictions, unlocks future DLCs as well (no need to update this mutator). However, it replaces the - [b]KFGFxMoviePlayer_Manager[/b] class so it may not be compatible with mods that also replace it.
+[*][b]ReplaceWeapons[/b] - replaces DLC weapons with their unlocked variants. Compatible with any mods, but may require a CTI update after the release of new DLC weapons.
+[*][b]True[/b] or [b]Auto[/b] - selects the most appropriate option automatically. Recommend putting CTIMut last in the mutator load queue if you use this.
+[/list]
+
 [*]Use [b][CTI.RemoveItems][/b] to remove items from the trader inventory.
-For example: [b]Item=KFGame.KFWeapDef_Mac10[/b] will remove MAC10 from sale.
+example: [b]Item=KFGame.KFWeapDef_Mac10[/b] will remove MAC10 from sale.
+
 [*]Set [b]bAll=True[/b] if you want to remove all items (can be useful if you want to set the entire sale list in the [b][CTI.AddItems][/b] section yourself).
+
 [*]Use [b][CTI.AddItems][/b] to add items to the trader inventory.
-For example: [b]Item=WeaponPack.KFWeapDef_XM25[/b] will add [url=https://steamcommunity.com/sharedfiles/filedetails/?id=1147408497]XM25[/url] to sale.
+example: [b]Item=WeaponPack.KFWeapDef_XM25[/b] will add [url=https://steamcommunity.com/sharedfiles/filedetails/?id=1147408497]XM25[/url] to sale.
 [/list]
 [h1]🔗 [url=https://steamcommunity.com/workshop/filedetails/discussion/2830826239/3409804177172972154]Weapon Packs Items[/url][/h1]
 
