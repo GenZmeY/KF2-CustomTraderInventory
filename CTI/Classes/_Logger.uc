@@ -4,6 +4,7 @@ class _Logger extends Object
 enum E_LogLevel
 {
 	LL_WrongLevel,
+	LL_None,
 	LL_Fatal,
 	LL_Error,
 	LL_Warning,
