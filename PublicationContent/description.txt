@@ -1,4 +1,4 @@
-[img]https://img.shields.io/static/v1?logo=GitHub&labelColor=gray&color=blue&logoColor=white&label=&message=Open Source[/img] [img]https://img.shields.io/github/license/GenZmeY/KF2-CustomTraderInventory[/img] [img]https://img.shields.io/steam/subscriptions/2830826239[/img] [img]https://img.shields.io/steam/favorites/2830826239[/img] [img]https://img.shields.io/steam/update-date/2830826239[/img] [url=https://steamcommunity.com/sharedfiles/filedetails/changelog/2830826239][img]https://img.shields.io/github/v/tag/GenZmeY/KF2-CustomTraderInventory[/img][/url]
+[img]https://img.shields.io/static/v1?logo=GitHub&labelColor=gray&color=blue&logoColor=white&label=&message=Open Source[/img] [img]https://img.shields.io/github/license/GenZmeY/KF2-CustomTraderInventory[/img] [img]https://img.shields.io/steam/downloads/2830826239[/img] [img]https://img.shields.io/steam/favorites/2830826239[/img] [img]https://img.shields.io/steam/update-date/2830826239[/img] [url=https://steamcommunity.com/sharedfiles/filedetails/changelog/2830826239][img]https://img.shields.io/github/v/tag/GenZmeY/KF2-CustomTraderInventory[/img][/url]
 
 [h1]Features[/h1]
 [list]
