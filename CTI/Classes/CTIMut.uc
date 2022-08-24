@@ -15,19 +15,17 @@ public event PreBeginPlay()
 	
 	foreach WorldInfo.DynamicActors(class'CTI', CTI)
 	{
-		`Log_Base("Found 'CTI'");
 		break;
 	}
 	
 	if (CTI == None)
 	{
-		`Log_Base("Spawn 'CTI'");
 		CTI = WorldInfo.Spawn(class'CTI');
 	}
 	
 	if (CTI == None)
 	{
-		`Log_Base("Can't Spawn 'CTI', Destroy...");
+		`Log_Base("FATAL: Can't Spawn 'CTI'");
 		SafeDestroy();
 	}
 }
