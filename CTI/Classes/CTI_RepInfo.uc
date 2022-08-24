@@ -1,6 +1,7 @@
 class CTI_RepInfo extends ReplicationInfo;
 
-const Trader = class'Trader';
+const Trader       = class'Trader';
+const LocalMessage = class'CTI_LocalMessage';
 
 var public  bool PendingSync;
 
@@ -119,7 +120,7 @@ private simulated function ShowReadyButton()
 	}
 }
 
-private simulated function UpdateNotification(String Title, String Downloading, String Remainig, int Percent)
+private simulated function UpdateNotification(String Title, String Left, String Right, int Percent)
 {
 	`Log_Trace();
 	
@@ -128,8 +129,8 @@ private simulated function UpdateNotification(String Title, String Downloading, 
 		Notification.SetString("itemName", Title);
 		Notification.SetFloat("percent", Percent);
 		Notification.SetInt("queue", 0);
-		Notification.SetString("downLoading", Downloading);
-		Notification.SetString("remaining", Remainig);
+		Notification.SetString("downLoading", Left);
+		Notification.SetString("remaining", Right);
 		Notification.SetObject("notificationInfo", Notification);
 		Notification.SetVisible(true);
 	}
@@ -164,8 +165,9 @@ private reliable client function ClientSync(class<KFWeaponDefinition> WeapDef, o
 	
 	Recieved = RemoveItems.Length + AddItems.Length;
 	
-	NotificationLeftText    = WeapDef.static.GetItemName();
-	NotificationRightText   = Recieved @ "/" @ SyncSize @ "(" $ (Remove ? "remove" : "add") $ ")";
+	NotificationHeaderText  = (Remove ? "-" : "+") @ WeapDef.static.GetItemName();
+	NotificationLeftText    = LocalMessage.static.GetLocalizedString(LogLevel, CTI_SyncItems);
+	NotificationRightText   = Recieved @ "/" @ SyncSize;
 	if (SyncSize != 0)
 	{
 		NotificationPercent = (float(Recieved) / float(SyncSize)) * 100;
@@ -199,8 +201,8 @@ private simulated reliable client function ClientSyncFinished()
 	if (WorldInfo.GRI == None)
 	{
 		`Log_Debug("ClientSyncFinished: Waiting GRI");
-		NotificationHeaderText = "Waiting for GameReplicationInfo...";
-		NotificationLeftText   = String(++WaitingGRI) $ "s";
+		NotificationHeaderText = LocalMessage.static.GetLocalizedString(LogLevel, CTI_WaitingGRI);
+		NotificationLeftText   = String(++WaitingGRI) $ LocalMessage.static.GetLocalizedString(LogLevel, CTI_SecondsShort);
 		NotificationRightText  = "";
 		SetTimer(1.0f, false, nameof(ClientSyncFinished));
 		return;
@@ -212,15 +214,15 @@ private simulated reliable client function ClientSyncFinished()
 		`Log_Fatal("Incompatible Replication info:" @ String(WorldInfo.GRI));
 		ClearTimer(nameof(KeepNotification));
 		UpdateNotification(
-			"Incompatible GRI:" @ String(WorldInfo.GRI),
-			"Disconnect...", "", 0);
+			LocalMessage.static.GetLocalizedString(LogLevel, CTI_IncompatibleGRI) @ String(WorldInfo.GRI),
+			LocalMessage.static.GetLocalizedString(LogLevel, CTI_Disconnect), "", 0);
 		Cleanup();
 		ConsoleCommand("Disconnect");
 		SafeDestroy();
 		return;
 	}
 	
-	NotificationHeaderText = "Sync finished";
+	NotificationHeaderText = LocalMessage.static.GetLocalizedString(LogLevel, CTI_SyncFinished);
 	NotificationLeftText   = "";
 	NotificationRightText  = "";
 	NotificationPercent    = 0;
@@ -285,7 +287,6 @@ defaultproperties
 	PendingSync = false
 	Recieved    = 0
 	
-	NotificationHeaderText = "Sync trader items, please wait..."
 	NotificationPercent    = 0
 	WaitingGRI             = 0
 }
