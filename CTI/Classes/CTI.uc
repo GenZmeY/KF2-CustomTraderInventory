@@ -243,14 +243,20 @@ public function NotifyLogin(Controller C)
 {
 	`Log_Trace();
 
-	CreateRepInfo(C);
+	if (!CreateRepInfo(C))
+	{
+		`Log_Error("Can't create RepInfo for:" @ C);
+	}
 }
 
 public function NotifyLogout(Controller C)
 {
 	`Log_Trace();
 
-	DestroyRepInfo(C);
+	if (!DestroyRepInfo(C))
+	{
+		`Log_Error("Can't destroy RepInfo of:" @ C);
+	}
 }
 
 public function bool CreateRepInfo(Controller C)
