@@ -253,10 +253,7 @@ public function NotifyLogout(Controller C)
 {
 	`Log_Trace();
 
-	if (!DestroyRepInfo(C))
-	{
-		`Log_Error("Can't destroy RepInfo of:" @ C);
-	}
+	DestroyRepInfo(C);
 }
 
 public function bool CreateRepInfo(Controller C)
@@ -304,8 +301,8 @@ public function bool DestroyRepInfo(Controller C)
 	{
 		if (RepInfo.Owner == C)
 		{
-			RepInfo.SafeDestroy();
 			RepInfos.RemoveItem(RepInfo);
+			RepInfo.SafeDestroy();
 			return true;
 		}
 	}
