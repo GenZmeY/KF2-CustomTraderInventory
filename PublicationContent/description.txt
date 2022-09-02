@@ -57,7 +57,6 @@ example: [b]Item=KFGame.KFWeapDef_Mac10[/b] will remove MAC10 from sale.
 [*]Use [b][CTI.AddItems][/b] to add items to the trader inventory.
 example: [b]Item=WeaponPack.KFWeapDef_XM25[/b] will add [url=https://steamcommunity.com/sharedfiles/filedetails/?id=1147408497]XM25[/url] to sale.
 [/list]
-[h1]🔗 [url=https://steamcommunity.com/workshop/filedetails/discussion/2830826239/3409804177172972154]Weapon Packs Items[/url][/h1]
 
 [h1]Notes[/h1]
 📌 Mutator does not contain custom weapons. You must have the required weapon packs in your subscriptions to be able to add them to the trader.
