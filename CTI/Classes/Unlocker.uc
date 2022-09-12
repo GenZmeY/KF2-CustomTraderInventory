@@ -169,27 +169,29 @@ private static function bool ReplaceFilter(KFGameInfo KFGI, E_LogLevel LogLevel)
 
 defaultproperties
 {
-	WeapDefDLCReplacements(0)  = class'CTI_WeapDef_AutoTurret'
-	WeapDefDLCReplacements(1)  = class'CTI_WeapDef_BladedPistol'
-	WeapDefDLCReplacements(2)  = class'CTI_WeapDef_Blunderbuss'
-	WeapDefDLCReplacements(3)  = class'CTI_WeapDef_ChainBat'
-	WeapDefDLCReplacements(4)  = class'CTI_WeapDef_ChiappaRhino'
-	WeapDefDLCReplacements(5)  = class'CTI_WeapDef_ChiappaRhinoDual'
-	WeapDefDLCReplacements(6)  = class'CTI_WeapDef_CompoundBow'
-	WeapDefDLCReplacements(7)  = class'CTI_WeapDef_Doshinegun'
-	WeapDefDLCReplacements(8)  = class'CTI_WeapDef_DualBladed'
-	WeapDefDLCReplacements(9)  = class'CTI_WeapDef_FAMAS'
-	WeapDefDLCReplacements(10) = class'CTI_WeapDef_G18'
-	WeapDefDLCReplacements(11) = class'CTI_WeapDef_GravityImploder'
-	WeapDefDLCReplacements(12) = class'CTI_WeapDef_IonThruster'
-	WeapDefDLCReplacements(13) = class'CTI_WeapDef_Mine_Reconstructor'
-	WeapDefDLCReplacements(14) = class'CTI_WeapDef_Minigun'
-	WeapDefDLCReplacements(15) = class'CTI_WeapDef_MosinNagant'
-	WeapDefDLCReplacements(16) = class'CTI_WeapDef_ParasiteImplanter'
-	WeapDefDLCReplacements(17) = class'CTI_WeapDef_Pistol_DualG18'
-	WeapDefDLCReplacements(18) = class'CTI_WeapDef_Pistol_G18C'
-	WeapDefDLCReplacements(19) = class'CTI_WeapDef_Rifle_FrostShotgunAxe'
-	WeapDefDLCReplacements(20) = class'CTI_WeapDef_ShrinkRayGun'
-	WeapDefDLCReplacements(21) = class'CTI_WeapDef_ThermiteBore'
-	WeapDefDLCReplacements(22) = class'CTI_WeapDef_Zweihander'
+	WeapDefDLCReplacements.Add(class'CTI_WeapDef_AutoTurret')
+	WeapDefDLCReplacements.Add(class'CTI_WeapDef_BladedPistol')
+	WeapDefDLCReplacements.Add(class'CTI_WeapDef_Blunderbuss')
+	WeapDefDLCReplacements.Add(class'CTI_WeapDef_ChainBat')
+	WeapDefDLCReplacements.Add(class'CTI_WeapDef_ChiappaRhino')
+	WeapDefDLCReplacements.Add(class'CTI_WeapDef_ChiappaRhinoDual')
+	WeapDefDLCReplacements.Add(class'CTI_WeapDef_CompoundBow')
+	WeapDefDLCReplacements.Add(class'CTI_WeapDef_Doshinegun')
+	WeapDefDLCReplacements.Add(class'CTI_WeapDef_DualBladed')
+	WeapDefDLCReplacements.Add(class'CTI_WeapDef_FAMAS')
+	WeapDefDLCReplacements.Add(class'CTI_WeapDef_G18')
+	WeapDefDLCReplacements.Add(class'CTI_WeapDef_G36C')
+	WeapDefDLCReplacements.Add(class'CTI_WeapDef_GravityImploder')
+	WeapDefDLCReplacements.Add(class'CTI_WeapDef_IonThruster')
+	WeapDefDLCReplacements.Add(class'CTI_WeapDef_Mine_Reconstructor')
+	WeapDefDLCReplacements.Add(class'CTI_WeapDef_Minigun')
+	WeapDefDLCReplacements.Add(class'CTI_WeapDef_MosinNagant')
+	WeapDefDLCReplacements.Add(class'CTI_WeapDef_ParasiteImplanter')
+	WeapDefDLCReplacements.Add(class'CTI_WeapDef_Pistol_DualG18')
+	WeapDefDLCReplacements.Add(class'CTI_WeapDef_Pistol_G18C')
+	WeapDefDLCReplacements.Add(class'CTI_WeapDef_Rifle_FrostShotgunAxe')
+	WeapDefDLCReplacements.Add(class'CTI_WeapDef_Scythe')
+	WeapDefDLCReplacements.Add(class'CTI_WeapDef_ShrinkRayGun')
+	WeapDefDLCReplacements.Add(class'CTI_WeapDef_ThermiteBore')
+	WeapDefDLCReplacements.Add(class'CTI_WeapDef_Zweihander')
 }
