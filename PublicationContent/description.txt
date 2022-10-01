@@ -49,7 +49,7 @@ Version=0[/b]
 
 [b]Right now this is the only way to correctly create the default config.[/b]
 
-Note that if you need an empty list anywhere (for example, you don't want to delete some of the traders's weapons), leave at least one line there:
+❗️ Note that if you need an empty list anywhere (for example, you don't want to delete some of the traders's weapons), leave at least one line there:
 [b]Item=""[/b]
 This is necessary to explicitly initialize the list (because of the bug I wrote about above) to avoid initialization with random values.
 
