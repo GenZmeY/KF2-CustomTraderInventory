@@ -41,7 +41,7 @@ So if you are using this mutator for the first time, I highly recommend doing th
 [*]Create (modify) [b]KFCTI.ini[/b] manually. Put the following content there:
 [b][CTI.CTI]
 Version=0[/b]
-[*]Start the game/server to generate the contents of the config.
+[*]Start the game/server with CTI to generate the contents of the config.
 [*]Close the game/server.
 [/olist]
 [b]Right now this is the only way to correctly create the default config.[/b]
