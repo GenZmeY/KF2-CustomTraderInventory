@@ -36,7 +36,6 @@ No. This mod is not whitelisted and will de-rank your server. Any XP gained will
 
 [h1]Important setup information[/h1]
 The config should be created on first start, but now the game contains a bug that initializes the config values ​​randomly if they are not explicitly set. Thus, the config may have incorrect values ​​or not be created at all.
-
 So if you are using this mutator for the first time, I highly recommend doing the following:
 [olist]
 [*]Create (modify) [b]KFCTI.ini[/b] manually. Put the following content there:
@@ -46,14 +45,12 @@ Version=0[/b]
 [*]Close the game/server
 [*]Now you have the correct default config.
 [/olist]
-
 [b]Right now this is the only way to correctly create the default config.[/b]
+Unfortunately now I can't do anything about it because it's a problem in the game and not in the mutator. I hope TWI fixes this someday.
 
 ❗️ Note that if you need an empty list anywhere (for example, you don't want to delete some of the traders's weapons), leave at least one line there:
 [b]Item=""[/b]
 This is necessary to explicitly initialize the list (because of the bug I wrote about above) to avoid initialization with random values.
-
-Unfortunately now I can't do anything about it because it's a problem in the game and not in the mutator. I hope TWI fixes this someday.
 
 [h1]Setup (KFCTI.ini)[/h1]
 [list]
