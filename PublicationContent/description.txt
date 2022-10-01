@@ -41,16 +41,11 @@ So if you are using this mutator for the first time, I highly recommend doing th
 [*]Create (modify) [b]KFCTI.ini[/b] manually. Put the following content there:
 [b][CTI.CTI]
 Version=0[/b]
-[*]Start the game/server to generate the contents of the config
-[*]Close the game/server
-[*]Now you have the correct default config.
+[*]Start the game/server to generate the contents of the config.
+[*]Close the game/server.
 [/olist]
 [b]Right now this is the only way to correctly create the default config.[/b]
-Unfortunately now I can't do anything about it because it's a problem in the game and not in the mutator. I hope TWI fixes this someday.
-
-❗️ Note that if you need an empty list anywhere (for example, you don't want to delete some of the traders's weapons), leave at least one line there:
-[b]Item=""[/b]
-This is necessary to explicitly initialize the list (because of the bug I wrote about above) to avoid initialization with random values.
+Unfortunately I can't do anything about it because it's a game problem (not mutator). I hope TWI fixes this someday.
 
 [h1]Setup (KFCTI.ini)[/h1]
 [list]
@@ -74,6 +69,10 @@ example: [b]Item=KFGame.KFWeapDef_Mac10[/b] will remove MAC10 from sale.
 [*]Use [b][CTI.AddItems][/b] to add items to the trader inventory.
 example: [b]Item=WeaponPack.KFWeapDef_XM25[/b] will add [url=https://steamcommunity.com/sharedfiles/filedetails/?id=1147408497]XM25[/url] to sale.
 [/list]
+
+❗️ Note that if you need an empty list anywhere (for example, you don't want to delete some of the traders's weapons), leave at least one line there:
+[b]Item=""[/b]
+This is necessary to explicitly initialize the list (because of the bug I wrote about above) to avoid initialization with random values.
 
 [h1]Notes[/h1]
 📌 Mutator does not contain custom weapons. You must have the required weapon packs in your subscriptions to be able to add them to the trader.
