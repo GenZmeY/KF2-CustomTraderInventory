@@ -16,7 +16,7 @@ No. This mod is not whitelisted and will de-rank your server. Any XP gained will
 [olist]
 [*]Subscribe to this mutator;
 [*]Start KF2; 
-[*]Open console (`) and input:
+[*]Open console (~) and input:
 [b]open KF-BioticsLab?Mutator=CTI.CTIMut[/b]
 (replace the map and add the parameters you need)
 [*]<Enter>.
@@ -34,8 +34,28 @@ No. This mod is not whitelisted and will de-rank your server. Any XP gained will
 [*]Add mutator to server start parameters: [b]?Mutator=CTI.CTIMut[/b] and restart the server.
 [/olist]
 
+[h1]Important setup information[/h1]
+The config should be created on first start, but now the game contains a bug that initializes the config values ​​randomly if they are not explicitly set. Thus, the config may have incorrect values ​​or not be created at all.
+
+So if you are using this mutator for the first time, I highly recommend doing the following:
+[olist]
+[*]Create (modify) [b]KFCTI.ini[/b] manually. Put the following content there:
+[b][CTI.CTI]
+Version=0[/b]
+[*]Start the game/server to generate the contents of the config
+[*]Close the game/server
+[*]Now you have the correct default config.
+[/olist]
+
+[b]Right now this is the only way to correctly create the default config.[/b]
+
+Note that if you need an empty list anywhere (for example, you don't want to delete some of the traders's weapons), leave at least one line there:
+[b]Item=""[/b]
+This is necessary to explicitly initialize the list (because of the bug I wrote about above) to avoid initialization with random values.
+
+Unfortunately now I can't do anything about it because it's a problem in the game and not in the mutator. I hope TWI fixes this someday.
+
 [h1]Setup (KFCTI.ini)[/h1]
-Config will be created at the first start[b]*[/b].
 [list]
 [*]Set [b]bPreloadContent=True[/b] to load weapon models in advance and have no lags during the game.
 
@@ -61,14 +81,6 @@ example: [b]Item=WeaponPack.KFWeapDef_XM25[/b] will add [url=https://steamcommun
 [h1]Notes[/h1]
 📌 Mutator does not contain custom weapons. You must have the required weapon packs in your subscriptions to be able to add them to the trader.
 📌 If you are using this mutator to add weapons, you should [b]not[/b] use mutators from weapon packs (just having them in subscriptions is enough).
-
-[h1]Troubleshooting[/h1]
-[b](*)[/b] If your config is not created for some reason, create it manually with the following content:
-[b][CTI.CTI]
-Version=0
-[/b]
-
-Then start the server and check the file again - config content should be generated.
 
 [h1]Sources[/h1]
 [url=https://github.com/GenZmeY/KF2-CustomTraderInventory]https://github.com/GenZmeY/KF2-CustomTraderInventory[/url] [b](GNU GPLv3)[/b]
