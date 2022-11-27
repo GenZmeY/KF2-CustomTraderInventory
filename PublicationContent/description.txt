@@ -65,6 +65,8 @@ Unfortunately I can't do anything about it because it's a game problem (not muta
 example: [b]Item=KFGame.KFWeapDef_Mac10[/b] will remove MAC10 from sale.
 
 [*]Set [b]bAll=True[/b] if you want to remove all items (can be useful if you want to set the entire sale list in the [b][CTI.AddItems][/b] section yourself).
+[*]Set [b]bHRG=True[/b] to remove HRG items.
+[*]Set [b]bDLC=True[/b] to remove DLC items.
 
 [*]Use [b][CTI.AddItems][/b] to add items to the trader inventory.
 example: [b]Item=WeaponPack.KFWeapDef_XM25[/b] will add [url=https://steamcommunity.com/sharedfiles/filedetails/?id=1147408497]XM25[/url] to sale.
