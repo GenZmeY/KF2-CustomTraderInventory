@@ -182,6 +182,7 @@ defaultproperties
 	WeapDefDLCReplacements.Add(class'CTI_WeapDef_G18')
 	WeapDefDLCReplacements.Add(class'CTI_WeapDef_G36C')
 	WeapDefDLCReplacements.Add(class'CTI_WeapDef_GravityImploder')
+	WeapDefDLCReplacements.Add(class'CTI_WeapDef_HVStormCannon')
 	WeapDefDLCReplacements.Add(class'CTI_WeapDef_IonThruster')
 	WeapDefDLCReplacements.Add(class'CTI_WeapDef_Mine_Reconstructor')
 	WeapDefDLCReplacements.Add(class'CTI_WeapDef_Minigun')
@@ -193,5 +194,6 @@ defaultproperties
 	WeapDefDLCReplacements.Add(class'CTI_WeapDef_Scythe')
 	WeapDefDLCReplacements.Add(class'CTI_WeapDef_ShrinkRayGun')
 	WeapDefDLCReplacements.Add(class'CTI_WeapDef_ThermiteBore')
+	WeapDefDLCReplacements.Add(class'CTI_WeapDef_ZedMKIII')
 	WeapDefDLCReplacements.Add(class'CTI_WeapDef_Zweihander')
 }
