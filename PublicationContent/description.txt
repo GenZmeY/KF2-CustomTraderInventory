@@ -73,7 +73,7 @@ example: [b]Item=WeaponPack.KFWeapDef_XM25[/b] will add [url=https://steamcommun
 [/list]
 
 ❗️ Note that if you need an empty list anywhere (for example, you don't want to delete some of the traders's weapons), leave at least one line there:
-[b]Item=""[/b]
+[b]Item=[/b]
 This is necessary to explicitly initialize the list (because of the bug I wrote about above) to avoid initialization with random values.
 
 [h1]Notes[/h1]
