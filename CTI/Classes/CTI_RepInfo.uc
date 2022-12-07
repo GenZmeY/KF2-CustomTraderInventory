@@ -10,6 +10,8 @@ var private E_LogLevel LogLevel;
 var private Array<class<KFWeaponDefinition> > RemoveItems;
 var private Array<class<KFWeaponDefinition> > AddItems;
 var private bool ReplaceMode;
+var private bool RemoveHRG;
+var private bool RemoveDLC;
 var private bool PreloadContent;
 
 var private int  Recieved;
@@ -29,7 +31,7 @@ var private int    WaitingGRI;
 replication
 {
 	if (bNetInitial && Role == ROLE_Authority)
-		LogLevel, ReplaceMode, SyncSize;
+		LogLevel, ReplaceMode, RemoveHRG, RemoveDLC, SyncSize;
 }
 
 public simulated function bool SafeDestroy()
@@ -44,7 +46,9 @@ public function PrepareSync(
 	E_LogLevel _LogLevel,
 	Array<class<KFWeaponDefinition> > _RemoveItems,
 	Array<class<KFWeaponDefinition> > _AddItems,
-	bool _ReplaceMode)
+	bool _ReplaceMode,
+	bool _RemoveHRG,
+	bool _RemoveDLC)
 {
 	`Log_Trace();
 	
@@ -53,6 +57,8 @@ public function PrepareSync(
 	RemoveItems         = _RemoveItems;
 	AddItems            = _AddItems;
 	ReplaceMode         = _ReplaceMode;
+	RemoveHRG           = _RemoveHRG;
+	RemoveDLC           = _RemoveDLC;
 	SyncSize            = RemoveItems.Length + AddItems.Length;
 }
 
@@ -227,7 +233,7 @@ private simulated reliable client function ClientSyncFinished()
 	NotificationRightText  = "";
 	NotificationPercent    = 0;
 
-	Trader.static.ModifyTrader(KFGRI, RemoveItems, AddItems, ReplaceMode, LogLevel);
+	Trader.static.ModifyTrader(KFGRI, RemoveItems, AddItems, ReplaceMode, RemoveHRG, RemoveDLC, LogLevel);
 	`Log_Debug("ClientSyncFinished: Trader.static.ModifyTrader");
 
 	ClearTimer(nameof(KeepNotification)); 

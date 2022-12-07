@@ -3,6 +3,8 @@ class RemoveItems extends Object
 	config(CTI);
 
 var public  config bool bAll;
+var public  config bool bHRG;
+var public  config bool bDLC;
 var private config Array<String> Item;
 
 public static function InitConfig(int Version, int LatestVersion)
@@ -11,6 +13,10 @@ public static function InitConfig(int Version, int LatestVersion)
 	{
 		case `NO_CONFIG:
 			ApplyDefault();
+			
+		case 2:
+			default.bHRG = false;
+			default.bDLC = false;
 			
 		default: break;
 	}
@@ -24,6 +30,8 @@ public static function InitConfig(int Version, int LatestVersion)
 private static function ApplyDefault()
 {
 	default.bAll = false;
+	default.bHRG = false;
+	default.bDLC = false;
 	default.Item.Length = 0;
 	default.Item.AddItem("KFGame.KFWeapDef_9mmDual");
 }
@@ -43,6 +51,15 @@ public static function Array<class<KFWeaponDefinition> > Load(E_LogLevel LogLeve
 	}
 	else
 	{
+		if (default.bHRG)
+		{
+			`Log_Info("Remove all HRG items");
+		}
+		if (default.bDLC)
+		{
+			`Log_Info("Remove all DLC items");
+		}
+		
 		foreach default.Item(ItemRaw, Line)
 		{
 			ItemWeapDef = class<KFWeaponDefinition>(DynamicLoadObject(ItemRaw, class'Class'));
