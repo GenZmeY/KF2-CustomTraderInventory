@@ -8,5 +8,5 @@ public function KFW_StartLoadWeaponContent()
 
 defaultproperties
 {
-	
+
 }
