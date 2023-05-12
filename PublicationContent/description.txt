@@ -15,7 +15,7 @@ No. This mod is not whitelisted and will de-rank your server. Any XP gained will
 [h1]Usage (single player)[/h1]
 [olist]
 [*]Subscribe to this mutator;
-[*]Start KF2; 
+[*]Start KF2;
 [*]Open console (~) and input:
 [b]open KF-BioticsLab?Mutator=CTI.CTIMut[/b]
 (replace the map and add the parameters you need)

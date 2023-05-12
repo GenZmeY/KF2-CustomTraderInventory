@@ -9,7 +9,7 @@ private delegate int ByPrice(class<KFWeaponDefinition> A, class<KFWeaponDefiniti
 public static function KFGFxObject_TraderItems GetTraderItems(optional KFGameReplicationInfo KFGRI = None, optional E_LogLevel LogLevel = LL_Trace)
 {
 	local String TraderItemsPath;
-	
+
 	if (KFGRI == None)
 	{
 		TraderItemsPath = class'KFGameReplicationInfo'.default.TraderItemsPath;
@@ -18,7 +18,7 @@ public static function KFGFxObject_TraderItems GetTraderItems(optional KFGameRep
 	{
 		TraderItemsPath = KFGRI.TraderItemsPath;
 	}
-	
+
 	return KFGFxObject_TraderItems(DynamicLoadObject(TraderItemsPath, class'KFGFxObject_TraderItems'));
 }
 
@@ -27,9 +27,9 @@ public static function Array<class<KFWeaponDefinition> > GetTraderWeapDefs(optio
 	local Array<class<KFWeaponDefinition> > KFWeapDefs;
 	local KFGFxObject_TraderItems TraderItems;
 	local STraderItem Item;
-	
+
 	TraderItems = GetTraderItems(KFGRI, LogLevel);
-	
+
 	foreach TraderItems.SaleItems(Item)
 	{
 		if (Item.WeaponDef != None)
@@ -37,7 +37,7 @@ public static function Array<class<KFWeaponDefinition> > GetTraderWeapDefs(optio
 			KFWeapDefs.AddItem(Item.WeaponDef);
 		}
 	}
-	
+
 	return KFWeapDefs;
 }
 
@@ -47,9 +47,9 @@ public static function Array<class<KFWeapon> > GetTraderWeapons(optional KFGameR
 	local class<KFWeapon> KFWeapon;
 	local KFGFxObject_TraderItems TraderItems;
 	local STraderItem Item;
-	
+
 	TraderItems = GetTraderItems(KFGRI, LogLevel);
-	
+
 	foreach TraderItems.SaleItems(Item)
 	{
 		if (Item.WeaponDef != None)
@@ -61,7 +61,7 @@ public static function Array<class<KFWeapon> > GetTraderWeapons(optional KFGameR
 			}
 		}
 	}
-	
+
 	return KFWeapons;
 }
 
@@ -70,11 +70,11 @@ public static function Array<class<KFWeaponDefinition> > GetTraderWeapDefsDLC(KF
 	local KFGFxObject_TraderItems TraderItems;
 	local STraderItem Item;
 	local Array<class<KFWeaponDefinition> > WeapDefs;
-	
+
 	`Log_TraceStatic();
-	
+
 	TraderItems = GetTraderItems(KFGRI, LogLevel);
-	
+
 	foreach TraderItems.SaleItems(Item)
 	{
 		if (Item.WeaponDef != None && Item.WeaponDef.default.SharedUnlockId != SCU_None)
@@ -82,7 +82,7 @@ public static function Array<class<KFWeaponDefinition> > GetTraderWeapDefsDLC(KF
 			WeapDefs.AddItem(Item.WeaponDef);
 		}
 	}
-	
+
 	return WeapDefs;
 }
 
@@ -101,11 +101,11 @@ public static simulated function ModifyTrader(
 	local Array<class<KFWeaponDefinition> > WeapDefs;
 	local int Index;
 	local int MaxItemID;
-	
+
 	`Log_TraceStatic();
-	
+
 	TraderItems = GetTraderItems(KFGRI, LogLevel);
-	
+
 	if (!ReplaceMode)
 	{
 		foreach TraderItems.SaleItems(Item)
@@ -120,14 +120,14 @@ public static simulated function ModifyTrader(
 			}
 		}
 	}
-	
+
 	for (Index = 0; Index < AddItems.Length; ++Index)
 	{
 		WeapDefs.AddItem(AddItems[Index]);
 	}
-	
+
 	WeapDefs.Sort(ByPrice);
-	
+
 	TraderItems.SaleItems.Length = 0;
 	MaxItemID = 0;
 	foreach WeapDefs(WeapDef)
@@ -138,16 +138,16 @@ public static simulated function ModifyTrader(
 	}
 
 	TraderItems.SetItemsInfo(TraderItems.SaleItems);
-	
+
 	KFGRI.TraderItems = TraderItems;
 }
 
 private static function bool WeaponClassIsUnique(String WeaponClassPath, Array<class<KFWeaponDefinition> > WeapDefs, E_LogLevel LogLevel)
 {
 	local class<KFWeaponDefinition> WeapDef;
-	
+
 	`Log_TraceStatic();
-	
+
 	foreach WeapDefs(WeapDef)
 	{
 		if (WeapDef.default.WeaponClassPath == WeaponClassPath)
@@ -155,11 +155,11 @@ private static function bool WeaponClassIsUnique(String WeaponClassPath, Array<c
 			return false;
 		}
 	}
-	
+
 	return true;
 }
 
 defaultproperties
 {
-	
+
 }

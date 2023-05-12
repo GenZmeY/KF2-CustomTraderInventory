@@ -13,7 +13,7 @@ var private const Array<class<KFWeaponDefinition> > WeapDefDLCReplacements;
 public static function bool IsValidTypeUnlockDLC(String UnlockType, E_LogLevel LogLevel)
 {
 	`Log_TraceStatic();
-	
+
 	switch (Locs(UnlockType))
 	{
 		case "true":
@@ -23,7 +23,7 @@ public static function bool IsValidTypeUnlockDLC(String UnlockType, E_LogLevel L
 		case "replacefilter":
 			return true;
 	}
-	
+
 	return false;
 }
 
@@ -36,7 +36,7 @@ public static function bool UnlockDLC(
 	E_LogLevel LogLevel)
 {
 	`Log_TraceStatic();
-	
+
 	switch (Locs(UnlockType))
 	{
 		case "true":
@@ -45,10 +45,10 @@ public static function bool UnlockDLC(
 
 		case "replaceweapons":
 			return ReplaceWeapons(KFGRI, RemoveItems, AddItems, LogLevel);
-			
+
 		case "replacefilter":
 			return ReplaceFilter(KFGI, LogLevel);
-			
+
 		case "false":
 		default:
 			return false;
@@ -63,11 +63,11 @@ private static function bool Auto(
 	E_LogLevel LogLevel)
 {
 	local bool CustomGFxManager;
-	
+
 	`Log_TraceStatic();
-	
+
 	if (KFGI == None) return false;
-	
+
 	if (KFGameInfo_VersusSurvival(KFGI) != None)
 	{
 		CustomGFxManager = (KFGI.KFGFxManagerClass != class'KFGameInfo_VersusSurvival'.default.KFGFxManagerClass);
@@ -97,14 +97,14 @@ private static function bool ReplaceWeapons(
 	local class<KFWeaponDefinition> WeapDefDLC;
 	local class<KFWeaponDefinition> WeapDefReplacement;
 	local bool Unlock, PartialUnlock;
-	
+
 	`Log_TraceStatic();
-	
+
 	Unlock = false;
 	PartialUnlock = false;
-	
+
 	WeapDefsDLCs = Trader.static.GetTraderWeapDefsDLC(KFGRI, LogLevel);
-	
+
 	foreach WeapDefsDLCs(WeapDefDLC)
 	{
 		WeapDefReplacement = PickReplacementWeapDefDLC(WeapDefDLC, LogLevel);
@@ -123,21 +123,21 @@ private static function bool ReplaceWeapons(
 			`Log_Warn("Can't unlock item:" @ WeapDefDLC @ "SharedUnlockId:" @ WeapDefDLC.default.SharedUnlockId);
 		}
 	}
-	
+
 	if (PartialUnlock)
 	{
 		`Log_Warn("Some DLCs are not unlocked. Try to set 'UnlockDLC=ReplaceFilter' or ask the author to update the mod");
 	}
-	
+
 	return Unlock;
 }
 
 private static function class<KFWeaponDefinition> PickReplacementWeapDefDLC(class<KFWeaponDefinition> WeapDefDLC, E_LogLevel LogLevel)
 {
 	local class<KFWeaponDefinition> WeapDef;
-	
+
 	`Log_TraceStatic();
-	
+
 	foreach default.WeapDefDLCReplacements(WeapDef)
 	{
 		if (ClassIsChildOf(WeapDef, WeapDefDLC))
@@ -145,16 +145,16 @@ private static function class<KFWeaponDefinition> PickReplacementWeapDefDLC(clas
 			return WeapDef;
 		}
 	}
-	
+
 	return None;
 }
 
 private static function bool ReplaceFilter(KFGameInfo KFGI, E_LogLevel LogLevel)
 {
 	`Log_TraceStatic();
-	
+
 	if (KFGI == None) return false;
-	
+
 	if (KFGameInfo_VersusSurvival(KFGI) != None)
 	{
 		KFGI.KFGFxManagerClass = class'CTI_GFxMoviePlayer_Manager_Versus';
@@ -163,7 +163,7 @@ private static function bool ReplaceFilter(KFGameInfo KFGI, E_LogLevel LogLevel)
 	{
 		KFGI.KFGFxManagerClass = class'CTI_GFxMoviePlayer_Manager';
 	}
-	
+
 	return true;
 }
 

@@ -51,7 +51,7 @@ public function PrepareSync(
 	bool _RemoveDLC)
 {
 	`Log_Trace();
-	
+
 	CTI                 = _CTI;
 	LogLevel            = _LogLevel;
 	RemoveItems         = _RemoveItems;
@@ -65,28 +65,28 @@ public function PrepareSync(
 private simulated function KFPlayerController GetKFPC()
 {
 	`Log_Trace();
-	
+
 	if (KFPC != None) return KFPC;
-	
+
 	KFPC = KFPlayerController(Owner);
-	
+
 	if (KFPC == None && ROLE < ROLE_Authority)
 	{
 		KFPC = KFPlayerController(GetALocalPlayerController());
 	}
-	
+
 	return KFPC;
 }
 
 private simulated function SetPartyInGameWidget()
 {
 	`Log_Trace();
-	
+
 	if (GetKFPC() == None) return;
-	
+
 	if (KFPC.MyGFxManager == None) return;
 	if (KFPC.MyGFxManager.PartyWidget == None) return;
-	
+
 	PartyInGameWidget = KFGFxWidget_PartyInGame(KFPC.MyGFxManager.PartyWidget);
 	Notification = PartyInGameWidget.Notification;
 }
@@ -94,19 +94,19 @@ private simulated function SetPartyInGameWidget()
 private simulated function bool CheckPartyInGameWidget()
 {
 	`Log_Trace();
-	
+
 	if (PartyInGameWidget == None)
 	{
 		SetPartyInGameWidget();
 	}
-	
+
 	return (PartyInGameWidget != None);
 }
 
 private simulated function HideReadyButton()
 {
 	`Log_Trace();
-	
+
 	if (CheckPartyInGameWidget())
 	{
 		PartyInGameWidget.SetReadyButtonVisibility(false);
@@ -116,7 +116,7 @@ private simulated function HideReadyButton()
 private simulated function ShowReadyButton()
 {
 	`Log_Trace();
-	
+
 	if (CheckPartyInGameWidget())
 	{
 		Notification.SetVisible(false);
@@ -129,7 +129,7 @@ private simulated function ShowReadyButton()
 private simulated function UpdateNotification(String Title, String Left, String Right, int Percent)
 {
 	`Log_Trace();
-	
+
 	if (CheckPartyInGameWidget() && Notification != None)
 	{
 		Notification.SetString("itemName", Title);
@@ -154,12 +154,12 @@ private reliable client function ClientSync(class<KFWeaponDefinition> WeapDef, o
 		SafeDestroy();
 		return;
 	}
-	
+
 	if (!IsTimerActive(nameof(KeepNotification)))
 	{
 		SetTimer(0.1f, true, nameof(KeepNotification));
 	}
-	
+
 	if (Remove)
 	{
 		RemoveItems.AddItem(WeapDef);
@@ -168,9 +168,9 @@ private reliable client function ClientSync(class<KFWeaponDefinition> WeapDef, o
 	{
 		AddItems.AddItem(WeapDef);
 	}
-	
+
 	Recieved = RemoveItems.Length + AddItems.Length;
-	
+
 	NotificationHeaderText  = (Remove ? "-" : "+") @ WeapDef.static.GetItemName();
 	NotificationLeftText    = LocalMessage.static.GetLocalizedString(LogLevel, CTI_SyncItems);
 	NotificationRightText   = Recieved @ "/" @ SyncSize;
@@ -178,9 +178,9 @@ private reliable client function ClientSync(class<KFWeaponDefinition> WeapDef, o
 	{
 		NotificationPercent = (float(Recieved) / float(SyncSize)) * 100;
 	}
-	
+
 	`Log_Debug("ClientSync:" @ (Remove ? "-" : "+") @ String(WeapDef) @ NotificationRightText);
-	
+
 	ServerSync();
 }
 
@@ -199,11 +199,11 @@ private simulated reliable client function ClientSyncFinished()
 	local KFGameReplicationInfo KFGRI;
 
 	`Log_Trace();
-	
+
 	NotificationLeftText  = "";
 	NotificationRightText = "";
 	NotificationPercent   = 0;
-	
+
 	if (WorldInfo.GRI == None)
 	{
 		`Log_Debug("ClientSyncFinished: Waiting GRI");
@@ -213,7 +213,7 @@ private simulated reliable client function ClientSyncFinished()
 		SetTimer(1.0f, false, nameof(ClientSyncFinished));
 		return;
 	}
-	
+
 	KFGRI = KFGameReplicationInfo(WorldInfo.GRI);
 	if (KFGRI == None)
 	{
@@ -227,7 +227,7 @@ private simulated reliable client function ClientSyncFinished()
 		SafeDestroy();
 		return;
 	}
-	
+
 	NotificationHeaderText = LocalMessage.static.GetLocalizedString(LogLevel, CTI_SyncFinished);
 	NotificationLeftText   = "";
 	NotificationRightText  = "";
@@ -236,18 +236,18 @@ private simulated reliable client function ClientSyncFinished()
 	Trader.static.ModifyTrader(KFGRI, RemoveItems, AddItems, ReplaceMode, RemoveHRG, RemoveDLC, LogLevel);
 	`Log_Debug("ClientSyncFinished: Trader.static.ModifyTrader");
 
-	ClearTimer(nameof(KeepNotification)); 
+	ClearTimer(nameof(KeepNotification));
 	ShowReadyButton();
-	
+
 	Cleanup();
-	
+
 	SafeDestroy();
 }
 
 private reliable server function Cleanup()
 {
 	`Log_Trace();
-	
+
 	`Log_Debug("Cleanup");
 	if (!CTI.DestroyRepInfo(Controller(Owner)))
 	{
@@ -259,11 +259,11 @@ private reliable server function Cleanup()
 public reliable server function ServerSync()
 {
 	`Log_Trace();
-	
+
 	PendingSync = false;
-	
+
 	if (bPendingDelete || bDeleteMe) return;
-	
+
 	if (SyncSize <= Recieved || WorldInfo.NetMode == NM_StandAlone)
 	{
 		`Log_Debug("ServerSync: Finished");
@@ -289,10 +289,10 @@ defaultproperties
 	bAlwaysRelevant               = false
 	bOnlyRelevantToOwner          = true
 	bSkipActorPropertyReplication = false
-	
+
 	PendingSync = false
 	Recieved    = 0
-	
+
 	NotificationPercent    = 0
 	WaitingGRI             = 0
 }
