@@ -16,23 +16,23 @@ public static function Update(bool Enabled)
 {
 	local Array<class<KFWeaponDefinition> > KFWeapDefs;
 	local class<KFWeaponDefinition> KFWeapDef;
-	
+
 	if (!Enabled) return;
 
 	KFWeapDefs = Trader.static.GetTraderWeapDefs();
-	
+
 	if (default.Item.Length != KFWeapDefs.Length || default.Comment != DefaultComment)
 	{
 		default.Comment = DefaultComment;
 		default.Item.Length = 0;
-		
+
 		foreach KFWeapDefs(KFWeapDef)
 		{
 			default.Item.AddItem(KFWeapDef.GetPackageName() $ "." $ KFWeapDef);
 		}
-		
+
 		default.Item.Sort(ByName);
-		
+
 		StaticSaveConfig();
 	}
 }

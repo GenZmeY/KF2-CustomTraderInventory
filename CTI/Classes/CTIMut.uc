@@ -1,5 +1,5 @@
 class CTIMut extends KFMutator;
-	
+
 var private CTI CTI;
 
 public simulated function bool SafeDestroy()
@@ -10,19 +10,19 @@ public simulated function bool SafeDestroy()
 public event PreBeginPlay()
 {
 	Super.PreBeginPlay();
-	
+
 	if (WorldInfo.NetMode == NM_Client) return;
-	
+
 	foreach WorldInfo.DynamicActors(class'CTI', CTI)
 	{
 		break;
 	}
-	
+
 	if (CTI == None)
 	{
 		CTI = WorldInfo.Spawn(class'CTI');
 	}
-	
+
 	if (CTI == None)
 	{
 		`Log_Base("FATAL: Can't Spawn 'CTI'");
@@ -33,7 +33,7 @@ public event PreBeginPlay()
 public function AddMutator(Mutator Mut)
 {
 	if (Mut == Self) return;
-	
+
 	if (Mut.Class == Class)
 		Mut.Destroy();
 	else
@@ -43,14 +43,14 @@ public function AddMutator(Mutator Mut)
 public function NotifyLogin(Controller C)
 {
 	CTI.NotifyLogin(C);
-	
+
 	Super.NotifyLogin(C);
 }
 
 public function NotifyLogout(Controller C)
 {
 	CTI.NotifyLogout(C);
-	
+
 	Super.NotifyLogout(C);
 }
 

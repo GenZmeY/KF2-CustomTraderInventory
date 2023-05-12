@@ -11,10 +11,10 @@ function bool IsItemFiltered(STraderItem Item, optional bool bDebug)
 	if (Item.WeaponDef.default.PlatformRestriction != PR_All && class'KFUnlockManager'.static.IsPlatformRestricted(Item.WeaponDef.default.PlatformRestriction))
 		return true;
 
-   	return false;
+	return false;
 }
 
 defaultproperties
 {
-	
+
 }

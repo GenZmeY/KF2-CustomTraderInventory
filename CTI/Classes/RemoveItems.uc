@@ -13,14 +13,14 @@ public static function InitConfig(int Version, int LatestVersion)
 	{
 		case `NO_CONFIG:
 			ApplyDefault();
-			
+
 		case 2:
 			default.bHRG = false;
 			default.bDLC = false;
-			
+
 		default: break;
 	}
-	
+
 	if (LatestVersion != Version)
 	{
 		StaticSaveConfig();
@@ -43,7 +43,7 @@ public static function Array<class<KFWeaponDefinition> > Load(E_LogLevel LogLeve
 	local class<KFWeapon> ItemWeapon;
 	local String ItemRaw;
 	local int    Line;
-	
+
 	`Log_Info("Load items to remove:");
 	if (default.bAll)
 	{
@@ -59,7 +59,7 @@ public static function Array<class<KFWeaponDefinition> > Load(E_LogLevel LogLeve
 		{
 			`Log_Info("Remove all DLC items");
 		}
-		
+
 		foreach default.Item(ItemRaw, Line)
 		{
 			ItemWeapDef = class<KFWeaponDefinition>(DynamicLoadObject(ItemRaw, class'Class'));
@@ -68,24 +68,24 @@ public static function Array<class<KFWeaponDefinition> > Load(E_LogLevel LogLeve
 				`Log_Warn("[" $ Line + 1 $ "]" @ "Can't load weapon definition:" @ ItemRaw);
 				continue;
 			}
-			
+
 			ItemWeapon = class<KFWeapon>(DynamicLoadObject(ItemWeapDef.default.WeaponClassPath, class'Class'));
 			if (ItemWeapon == None)
 			{
 				`Log_Warn("[" $ Line + 1 $ "]" @ "Can't load weapon:" @ ItemWeapDef.default.WeaponClassPath);
 				continue;
 			}
-			
+
 			if (ItemList.Find(ItemWeapDef) != INDEX_NONE)
 			{
 				`Log_Warn("[" $ Line + 1 $ "]" @ "Duplicate item:" @ ItemRaw @ "(skip)");
 				continue;
 			}
-			
+
 			ItemList.AddItem(ItemWeapDef);
 			`Log_Debug("[" $ Line + 1 $ "]" @ "Loaded successfully:" @ ItemRaw);
 		}
-		
+
 		if (ItemList.Length == default.Item.Length)
 		{
 			`Log_Info("Items to remove list loaded successfully (" $ ItemList.Length @ "entries)");
@@ -95,7 +95,7 @@ public static function Array<class<KFWeaponDefinition> > Load(E_LogLevel LogLeve
 			`Log_Info("Items to remove list: loaded" @ ItemList.Length @ "of" @ default.Item.Length @ "entries");
 		}
 	}
-	
+
 	return ItemList;
 }
 
