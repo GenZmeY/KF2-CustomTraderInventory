@@ -56,5 +56,5 @@ public function NotifyLogout(Controller C)
 
 DefaultProperties
 {
-
+	GroupNames.Add("TraderItems")
 }
