@@ -192,6 +192,7 @@ defaultproperties
 	WeapDefDLCReplacements.Add(class'CTI_WeapDef_Pistol_G18C')
 	WeapDefDLCReplacements.Add(class'CTI_WeapDef_Rifle_FrostShotgunAxe')
 	WeapDefDLCReplacements.Add(class'CTI_WeapDef_Scythe')
+	WeapDefDLCReplacements.Add(class'CTI_WeapDef_Shotgun_S12')
 	WeapDefDLCReplacements.Add(class'CTI_WeapDef_ShrinkRayGun')
 	WeapDefDLCReplacements.Add(class'CTI_WeapDef_ThermiteBore')
 	WeapDefDLCReplacements.Add(class'CTI_WeapDef_ZedMKIII')
