@@ -32,7 +32,7 @@ public event PreBeginPlay()
 
 public function AddMutator(Mutator Mut)
 {
-	if (Mut == Self) return;
+	if (Mut == Self || bPendingDelete || bDeleteMe) return;
 
 	if (Mut.Class == Class)
 		CTIMut(Mut).SafeDestroy();
