@@ -35,7 +35,7 @@ public function AddMutator(Mutator Mut)
 	if (Mut == Self) return;
 
 	if (Mut.Class == Class)
-		Mut.Destroy();
+		CTIMut(Mut).SafeDestroy();
 	else
 		Super.AddMutator(Mut);
 }
@@ -56,5 +56,5 @@ public function NotifyLogout(Controller C)
 
 DefaultProperties
 {
-
+	GroupNames.Add("TraderItems")
 }
