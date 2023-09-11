@@ -122,6 +122,11 @@ private static function bool ReplaceWeapons(
 			PartialUnlock = true;
 			`Log_Warn("Can't unlock item:" @ WeapDefDLC @ "SharedUnlockId:" @ WeapDefDLC.default.SharedUnlockId);
 		}
+
+		if (RemoveItems.Find(WeapDefDLC) == INDEX_NONE)
+		{
+			RemoveItems.AddItem(WeapDefDLC);
+		}
 	}
 
 	if (PartialUnlock)
