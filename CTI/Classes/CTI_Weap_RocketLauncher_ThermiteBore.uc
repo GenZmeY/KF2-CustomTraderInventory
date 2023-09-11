@@ -1,0 +1,6 @@
+class CTI_Weap_RocketLauncher_ThermiteBore extends KFWeap_RocketLauncher_ThermiteBore;
+
+defaultproperties
+{
+
+}
