@@ -69,7 +69,7 @@ example: [b]Item=KFGame.KFWeapDef_Mac10[/b] will remove MAC10 from sale.
 [*]Set [b]bDLC=True[/b] to remove DLC items.
 
 [*]Use [b][CTI.AddItems][/b] to add items to the trader inventory.
-example: [b]Item=WeaponPack.KFWeapDef_XM25[/b] will add [url=https://steamcommunity.com/sharedfiles/filedetails/?id=1147408497]XM25[/url] to sale.
+example: [b]Item=WeaponPackExt.KFWeapDef_XM25[/b] will add [url=https://steamcommunity.com/sharedfiles/filedetails/?id=1147408497]XM25[/url] to sale.
 [/list]
 
 ❗️ Note that if you need an empty list anywhere (for example, you don't want to delete some of the traders's weapons), leave at least one line there:
