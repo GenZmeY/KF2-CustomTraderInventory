@@ -1,7 +1,7 @@
 class CTI extends Info
 	config(CTI);
 
-const LatestVersion = 3;
+const LatestVersion = 4;
 
 const CfgRemoveItems     = class'RemoveItems';
 const CfgAddItems        = class'AddItems';
@@ -22,18 +22,18 @@ var private config E_LogLevel LogLevel;
 var private config String     UnlockDLC;
 var private config bool       bPreloadContent;
 var private config bool       bOfficialWeaponsList;
+var private config bool       bDisableItemLimitCheck;
 
-var private KFGameInfo KFGI;
+var private KFGameInfo            KFGI;
 var private KFGameReplicationInfo KFGRI;
 
+var private Array<class<KFWeaponDefinition> > WeapDefs;
 var private Array<class<KFWeaponDefinition> > RemoveItems;
 var private Array<class<KFWeaponDefinition> > AddItems;
 
 var private Array<CTI_RepInfo> RepInfos;
 
 var private bool ReadyToSync;
-
-var private Array<S_PreloadContent> PreloadContent;
 
 public simulated function bool SafeDestroy()
 {
@@ -95,6 +95,8 @@ private function PreInit()
 			bOfficialWeaponsList = false;
 
 		case 2:
+		case 3:
+			bDisableItemLimitCheck = false;
 
 		case MaxInt:
 			`Log_Info("Config updated to version" @ LatestVersion);
@@ -129,7 +131,7 @@ private function PreInit()
 
 	if (!Unlocker.static.IsValidTypeUnlockDLC(UnlockDLC, LogLevel))
 	{
-		`Log_Warn("Wrong 'UnlockDLC' (" $ UnlockDLC $ "), return to default value (False)");
+		`Log_Warn("Wrong 'UnlockDLC' value (" $ UnlockDLC $ "), return to default value (False)");
 		UnlockDLC = "False";
 		SaveConfig();
 	}
@@ -189,7 +191,10 @@ private function PostInit()
 		CfgRemoveItems.default.bAll,
 		CfgRemoveItems.default.bHRG,
 		CfgRemoveItems.default.bDLC,
+		bDisableItemLimitCheck,
 		LogLevel);
+
+	WeapDefs = Trader.static.GetTraderWeapDefs(KFGRI, LogLevel);
 
 	ReadyToSync = true;
 
@@ -197,26 +202,24 @@ private function PostInit()
 	{
 		if (RepInfo.PendingSync)
 		{
-			RepInfo.ServerSync();
+			RepInfo.Replicate(WeapDefs);
 		}
 	}
 }
 
-private function Preload(Array<class<KFWeaponDefinition> > Content)
+private function Preload(const out Array<class<KFWeaponDefinition> > Content)
 {
-	local Array<class<KFWeapon> > OfficialWeapons;
+	local Array<S_PreloadContent> PreloadContent;
 	local S_PreloadContent SPC;
 
 	`Log_Trace();
-
-	OfficialWeapons = Trader.static.GetTraderWeapons();
 
 	foreach Content(SPC.KFWD)
 	{
 		SPC.KFWC = class<KFWeapon> (DynamicLoadObject(SPC.KFWD.default.WeaponClassPath, class'Class'));
 		if (SPC.KFWC != None)
 		{
-			if (OfficialWeapons.Find(SPC.KFWC) != INDEX_NONE)
+			if (SPC.KFWC.GetPackageName() == 'CTI' || SPC.KFWC.GetPackageName() == 'KFGameContent')
 			{
 				`Log_Debug("Skip preload:" @ SPC.KFWD.GetPackageName() $ "." $ SPC.KFWD);
 				continue;
@@ -271,26 +274,19 @@ public function bool CreateRepInfo(Controller C)
 
 	`Log_Trace();
 
-	if (C == None) return false;
+	if (C == None || KFPlayerController(C) == None) return false;
 
 	RepInfo = Spawn(class'CTI_RepInfo', C);
 
 	if (RepInfo == None) return false;
 
-	RepInfo.PrepareSync(
-		Self,
-		LogLevel,
-		RemoveItems,
-		AddItems,
-		CfgRemoveItems.default.bAll,
-		CfgRemoveItems.default.bHRG,
-		CfgRemoveItems.default.bDLC);
+	RepInfo.PrepareSync(Self, KFPlayerController(C), LogLevel);
 
 	RepInfos.AddItem(RepInfo);
 
 	if (ReadyToSync)
 	{
-		RepInfo.ServerSync();
+		RepInfo.Replicate(WeapDefs);
 	}
 	else
 	{

@@ -1,21 +1,23 @@
 class CTI_RepInfo extends ReplicationInfo;
 
+const CAPACITY = 64; // max: 128
+
 const Trader       = class'Trader';
 const LocalMessage = class'CTI_LocalMessage';
+
+struct ReplicationStruct
+{
+	var int Size;
+	var int Transfered;
+
+	var class<KFWeaponDefinition> Items[CAPACITY];
+	var int Length;
+};
 
 var public  bool PendingSync;
 
 var private CTI CTI;
 var private E_LogLevel LogLevel;
-var private Array<class<KFWeaponDefinition> > RemoveItems;
-var private Array<class<KFWeaponDefinition> > AddItems;
-var private bool ReplaceMode;
-var private bool RemoveHRG;
-var private bool RemoveDLC;
-var private bool PreloadContent;
-
-var private int  Recieved;
-var private int  SyncSize;
 
 var private KFPlayerController      KFPC;
 var private KFGFxWidget_PartyInGame PartyInGameWidget;
@@ -29,10 +31,13 @@ var private int    NotificationPercent;
 var private int    WaitingGRI;
 var private int    WaitingGRILimit;
 
+var private ReplicationStruct                 RepData;
+var private Array<class<KFWeaponDefinition> > RepArray;
+
 replication
 {
 	if (bNetInitial && Role == ROLE_Authority)
-		LogLevel, ReplaceMode, RemoveHRG, RemoveDLC, SyncSize;
+		LogLevel;
 }
 
 public simulated function bool SafeDestroy()
@@ -42,25 +47,116 @@ public simulated function bool SafeDestroy()
 	return (bPendingDelete || bDeleteMe || Destroy());
 }
 
-public function PrepareSync(
-	CTI _CTI,
-	E_LogLevel _LogLevel,
-	Array<class<KFWeaponDefinition> > _RemoveItems,
-	Array<class<KFWeaponDefinition> > _AddItems,
-	bool _ReplaceMode,
-	bool _RemoveHRG,
-	bool _RemoveDLC)
+public function Replicate(const out Array<class<KFWeaponDefinition> > WeapDefs)
 {
 	`Log_Trace();
 
-	CTI                 = _CTI;
-	LogLevel            = _LogLevel;
-	RemoveItems         = _RemoveItems;
-	AddItems            = _AddItems;
-	ReplaceMode         = _ReplaceMode;
-	RemoveHRG           = _RemoveHRG;
-	RemoveDLC           = _RemoveDLC;
-	SyncSize            = RemoveItems.Length + AddItems.Length;
+	RepArray = WeapDefs;
+	RepData.Size = RepArray.Length;
+
+	if (WorldInfo.NetMode == NM_StandAlone)
+	{
+		Progress(RepArray.Length, RepArray.Length);
+		return;
+	}
+
+	Sync();
+}
+
+private reliable server function Sync()
+{
+	local int  LocalIndex;
+	local int  GlobalIndex;
+
+	`Log_Trace();
+
+	LocalIndex = 0;
+	GlobalIndex = RepData.Transfered;
+
+	while (LocalIndex < CAPACITY && GlobalIndex < RepData.Size)
+	{
+		RepData.Items[LocalIndex++] = RepArray[GlobalIndex++];
+	}
+
+	if (RepData.Transfered == GlobalIndex) return; // Finished
+
+	RepData.Transfered = GlobalIndex;
+	RepData.Length = LocalIndex;
+
+	Send(RepData);
+
+	Progress(RepData.Transfered, RepData.Size);
+}
+
+private reliable client function Send(ReplicationStruct RD)
+{
+	local int LocalIndex;
+
+	`Log_Trace();
+
+	for (LocalIndex = 0; LocalIndex < RD.Length; LocalIndex++)
+	{
+		RepArray.AddItem(RD.Items[LocalIndex]);
+	}
+
+	Progress(RD.Transfered, RD.Size);
+
+	Sync();
+}
+
+public function PrepareSync(CTI _CTI, KFPlayerController _KFPC, E_LogLevel _LogLevel)
+{
+	`Log_Trace();
+
+	CTI      = _CTI;
+	KFPC     = _KFPC;
+	LogLevel = _LogLevel;
+}
+
+private simulated function Progress(int Value, int Size)
+{
+	`Log_Trace();
+
+	`Log_Debug("Replicated:" @ Value @ "/" @ Size);
+
+	if (ROLE < ROLE_Authority)
+	{
+		NotifyProgress(Value, Size);
+		if (Value >= Size) Finished();
+	}
+}
+
+private simulated function Finished()
+{
+	local KFGameReplicationInfo KFGRI;
+
+	`Log_Trace();
+
+	if (WorldInfo.GRI == None && WaitingGRI++ < WaitingGRILimit)
+	{
+		`Log_Debug("Finished: Waiting GRI" @ WaitingGRI);
+		NotifyWaitingGRI();
+		SetTimer(1.0f, false, nameof(Finished));
+		return;
+	}
+
+	KFGRI = KFGameReplicationInfo(WorldInfo.GRI);
+	if (KFGRI != None)
+	{
+		`Log_Debug("Finished: Trader.static.OverwriteTraderItems");
+		Trader.static.OverwriteTraderItems(KFGRI, RepArray, LogLevel);
+		`Log_Info("Trader items successfully synchronized!");
+	}
+	else
+	{
+		`Log_Error("Incompatible Replication info:" @ String(WorldInfo.GRI));
+		NotifyIncompatibleGRI();
+	}
+
+	ShowReadyButton();
+
+	Cleanup();
+	SafeDestroy();
 }
 
 private simulated function KFPlayerController GetKFPC()
@@ -151,6 +247,8 @@ private simulated function ShowReadyButton()
 {
 	`Log_Trace();
 
+	ClearTimer(nameof(KeepNotification));
+
 	if (CheckPartyInGameWidget())
 	{
 		Notification.SetVisible(false);
@@ -176,48 +274,6 @@ private simulated function UpdateNotification(String Title, String Left, String 
 	}
 }
 
-private reliable client function ClientSync(class<KFWeaponDefinition> WeapDef, optional bool Remove = false)
-{
-	`Log_Trace();
-
-	if (WeapDef == None)
-	{
-		`Log_Fatal("WeapDef is:" @ WeapDef);
-		Cleanup();
-		ConsoleCommand("Disconnect");
-		SafeDestroy();
-		return;
-	}
-
-	if (!IsTimerActive(nameof(KeepNotification)))
-	{
-		SetTimer(0.1f, true, nameof(KeepNotification));
-	}
-
-	if (Remove)
-	{
-		RemoveItems.AddItem(WeapDef);
-	}
-	else
-	{
-		AddItems.AddItem(WeapDef);
-	}
-
-	Recieved = RemoveItems.Length + AddItems.Length;
-
-	NotificationHeaderText  = (Remove ? "-" : "+") @ WeapDef.static.GetItemName();
-	NotificationLeftText    = LocalMessage.static.GetLocalizedString(LogLevel, CTI_SyncItems);
-	NotificationRightText   = Recieved @ "/" @ SyncSize;
-	if (SyncSize != 0)
-	{
-		NotificationPercent = (float(Recieved) / float(SyncSize)) * 100;
-	}
-
-	`Log_Debug("ClientSync:" @ (Remove ? "-" : "+") @ String(WeapDef) @ NotificationRightText);
-
-	ServerSync();
-}
-
 private simulated function KeepNotification()
 {
 	HideReadyButton();
@@ -228,91 +284,55 @@ private simulated function KeepNotification()
 		NotificationPercent);
 }
 
-private simulated reliable client function ClientSyncFinished()
-{
-	local KFGameReplicationInfo KFGRI;
-
-	`Log_Trace();
-
-	if (WorldInfo.GRI == None && WaitingGRI++ < WaitingGRILimit)
-	{
-		`Log_Debug("ClientSyncFinished: Waiting GRI" @ WaitingGRI);
-		NotificationHeaderText = LocalMessage.static.GetLocalizedString(LogLevel, CTI_WaitingGRI);
-		NotificationLeftText   = String(WaitingGRI) $ LocalMessage.static.GetLocalizedString(LogLevel, CTI_SecondsShort);
-		NotificationRightText  = "";
-		NotificationPercent    = 0;
-		SetTimer(1.0f, false, nameof(ClientSyncFinished));
-		return;
-	}
-
-	NotificationHeaderText = "";
-	NotificationLeftText   = "";
-	NotificationRightText  = "";
-	NotificationPercent    = 0;
-
-	KFGRI = KFGameReplicationInfo(WorldInfo.GRI);
-	if (KFGRI != None)
-	{
-		`Log_Debug("ClientSyncFinished: Trader.static.ModifyTrader");
-		Trader.static.ModifyTrader(KFGRI, RemoveItems, AddItems, ReplaceMode, RemoveHRG, RemoveDLC, LogLevel);
-	}
-	else
-	{
-		`Log_Error("Incompatible Replication info:" @ String(WorldInfo.GRI));
-		WriteToChatLocalized(
-			CTI_IncompatibleGRI,
-			class'KFLocalMessage'.default.InteractionColor,
-			WorldInfo.GRI == None ? "None" : String(WorldInfo.GRI.class));
-		WriteToChatLocalized(
-			CTI_IncompatibleGRIWarning,
-			class'KFLocalMessage'.default.InteractionColor);
-	}
-
-	ClearTimer(nameof(KeepNotification));
-	ShowReadyButton();
-
-	Cleanup();
-	SafeDestroy();
-}
-
 private reliable server function Cleanup()
 {
 	`Log_Trace();
 
 	`Log_Debug("Cleanup");
-	if (!CTI.DestroyRepInfo(Controller(Owner)))
+	if (!CTI.DestroyRepInfo(GetKFPC()))
 	{
 		`Log_Debug("Cleanup (forced)");
 		SafeDestroy();
 	}
 }
 
-public reliable server function ServerSync()
+private simulated function NotifyWaitingGRI()
 {
-	`Log_Trace();
-
-	PendingSync = false;
-
-	if (bPendingDelete || bDeleteMe) return;
-
-	if (SyncSize <= Recieved || WorldInfo.NetMode == NM_StandAlone)
+	if (!IsTimerActive(nameof(KeepNotification)))
 	{
-		`Log_Debug("ServerSync: Finished");
-		ClientSyncFinished();
+		SetTimer(0.1f, true, nameof(KeepNotification));
 	}
-	else
+
+	NotificationHeaderText = LocalMessage.static.GetLocalizedString(LogLevel, CTI_WaitingGRI);
+	NotificationLeftText   = String(WaitingGRI) $ LocalMessage.static.GetLocalizedString(LogLevel, CTI_SecondsShort);
+	NotificationRightText  = LocalMessage.static.GetLocalizedString(LogLevel, CTI_PleaseWait);
+	NotificationPercent    = 0;
+	KeepNotification();
+}
+
+private simulated function NotifyProgress(int Value, int Size)
+{
+	if (!IsTimerActive(nameof(KeepNotification)))
 	{
-		if (Recieved < RemoveItems.Length)
-		{
-			`Log_Debug("ServerSync[-]:" @ (Recieved + 1) @ "/" @ SyncSize @ RemoveItems[Recieved]);
-			ClientSync(RemoveItems[Recieved++], true);
-		}
-		else
-		{
-			`Log_Debug("ServerSync[+]:" @ (Recieved + 1) @ "/" @ SyncSize @ AddItems[Recieved - RemoveItems.Length]);
-			ClientSync(AddItems[Recieved++ - RemoveItems.Length], false);
-		}
+		SetTimer(0.1f, true, nameof(KeepNotification));
 	}
+
+	NotificationHeaderText  = LocalMessage.static.GetLocalizedString(LogLevel, CTI_SyncItems);
+	NotificationLeftText    = Value @ "/" @ Size;
+	NotificationRightText   = LocalMessage.static.GetLocalizedString(LogLevel, CTI_PleaseWait);
+	NotificationPercent     = (float(Value) / float(Size)) * 100;
+	KeepNotification();
+}
+
+private simulated function NotifyIncompatibleGRI()
+{
+	WriteToChatLocalized(
+		CTI_IncompatibleGRI,
+		class'KFLocalMessage'.default.InteractionColor,
+		String(WorldInfo.GRI.class));
+	WriteToChatLocalized(
+		CTI_IncompatibleGRIWarning,
+		class'KFLocalMessage'.default.InteractionColor);
 }
 
 defaultproperties
@@ -322,9 +342,8 @@ defaultproperties
 	bSkipActorPropertyReplication = false
 
 	PendingSync = false
-	Recieved    = 0
 
 	NotificationPercent    = 0
 	WaitingGRI             = 0
-	WaitingGRILimit        = 15
+	WaitingGRILimit        = 30
 }
