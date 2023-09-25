@@ -189,6 +189,7 @@ defaultproperties
 	WeapDefDLCReplacements.Add(class'CTI_WeapDef_GravityImploder')
 	WeapDefDLCReplacements.Add(class'CTI_WeapDef_HVStormCannon')
 	WeapDefDLCReplacements.Add(class'CTI_WeapDef_IonThruster')
+	WeapDefDLCReplacements.Add(class'CTI_WeapDef_MG3')
 	WeapDefDLCReplacements.Add(class'CTI_WeapDef_Mine_Reconstructor')
 	WeapDefDLCReplacements.Add(class'CTI_WeapDef_Minigun')
 	WeapDefDLCReplacements.Add(class'CTI_WeapDef_MosinNagant')
