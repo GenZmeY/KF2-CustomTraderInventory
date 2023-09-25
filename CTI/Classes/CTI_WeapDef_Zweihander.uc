@@ -3,9 +3,7 @@ class CTI_WeapDef_Zweihander extends KFWeapDef_Zweihander
 
 static function String GetItemLocalization(String KeyName)
 {
-	local Array<String> Strings;
-	ParseStringIntoArray(class'KFGame.KFWeapDef_Zweihander'.default.WeaponClassPath, Strings, ".", true);
-	return Localize(Strings[1], KeyName, Strings[0]);
+	return class'KFGame.KFWeapDef_Zweihander'.static.GetItemLocalization(KeyName);
 }
 
 defaultproperties

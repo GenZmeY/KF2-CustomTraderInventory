@@ -3,9 +3,7 @@ class CTI_WeapDef_Rifle_FrostShotgunAxe extends KFWeapDef_Rifle_FrostShotgunAxe
 
 static function String GetItemLocalization(String KeyName)
 {
-	local Array<String> Strings;
-	ParseStringIntoArray(class'KFGame.KFWeapDef_Rifle_FrostShotgunAxe'.default.WeaponClassPath, Strings, ".", true);
-	return Localize(Strings[1], KeyName, Strings[0]);
+	return class'KFGame.KFWeapDef_Rifle_FrostShotgunAxe'.static.GetItemLocalization(KeyName);
 }
 
 defaultproperties
