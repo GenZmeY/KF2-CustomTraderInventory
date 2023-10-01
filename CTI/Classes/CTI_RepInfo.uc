@@ -1,9 +1,11 @@
-class CTI_RepInfo extends ReplicationInfo;
+class CTI_RepInfo extends ReplicationInfo
+	dependson(WeaponReplacements);
 
 const CAPACITY = 64; // max: 128
 
 const Trader       = class'Trader';
 const LocalMessage = class'CTI_LocalMessage';
+const Replacements = class'WeaponReplacements';
 
 struct ReplicationStruct
 {
@@ -20,6 +22,7 @@ var private CTI CTI;
 var private E_LogLevel LogLevel;
 
 var private KFPlayerController      KFPC;
+var private KFPlayerReplicationInfo KFPRI;
 var private KFGFxWidget_PartyInGame PartyInGameWidget;
 var private GFxObject               Notification;
 
@@ -34,10 +37,12 @@ var private int    WaitingGRILimit;
 var private ReplicationStruct                 RepData;
 var private Array<class<KFWeaponDefinition> > RepArray;
 
+var private bool SkinUpdateRequired;
+
 replication
 {
 	if (bNetInitial && Role == ROLE_Authority)
-		LogLevel;
+		LogLevel, SkinUpdateRequired;
 }
 
 public simulated function bool SafeDestroy()
@@ -104,13 +109,14 @@ private reliable client function Send(ReplicationStruct RD)
 	Sync();
 }
 
-public function PrepareSync(CTI _CTI, KFPlayerController _KFPC, E_LogLevel _LogLevel)
+public function PrepareSync(CTI _CTI, KFPlayerController _KFPC, E_LogLevel _LogLevel, bool _SkinUpdateRequired)
 {
 	`Log_Trace();
 
-	CTI      = _CTI;
-	KFPC     = _KFPC;
-	LogLevel = _LogLevel;
+	CTI                = _CTI;
+	KFPC               = _KFPC;
+	LogLevel           = _LogLevel;
+	SkinUpdateRequired = _SkinUpdateRequired;
 }
 
 private simulated function Progress(int Value, int Size)
@@ -155,8 +161,35 @@ private simulated function Finished()
 
 	ShowReadyButton();
 
-	Cleanup();
-	SafeDestroy();
+	if (SkinUpdateRequired)
+	{
+		SetTimer(1.0f, true, nameof(UpdateSkinsDLC));
+	}
+	else
+	{
+		ClientCleanup();
+	}
+}
+
+private simulated function UpdateSkinsDLC()
+{
+	local SWeapReplace WeapReplace;
+
+	`Log_Debug("Wait for spawn");
+	if (GetKFPRI() != None && KFPRI.bHasSpawnedIn)
+	{
+		foreach Replacements.default.DLC(WeapReplace)
+		{
+			if (WeapReplace.WeapParent.default.SkinItemId > 0 && WeapReplace.Weap.default.SkinItemId != WeapReplace.WeapParent.default.SkinItemId)
+			{
+				`Log_Debug("Update skin for:" @ String(WeapReplace.WeapDef) @ "SkinId:" @ WeapReplace.WeapParent.default.SkinItemId);
+				class'KFWeaponSkinList'.static.SaveWeaponSkin(WeapReplace.WeapDef, WeapReplace.WeapParent.default.SkinItemId);
+			}
+		}
+
+		ClearTimer(nameof(UpdateSkinsDLC));
+		ClientCleanup();
+	}
 }
 
 private simulated function KFPlayerController GetKFPC()
@@ -173,6 +206,19 @@ private simulated function KFPlayerController GetKFPC()
 	}
 
 	return KFPC;
+}
+
+private simulated function KFPlayerReplicationInfo GetKFPRI()
+{
+	`Log_Trace();
+
+	if (KFPRI != None) return KFPRI;
+
+	if (GetKFPC() == None) return None;
+
+	KFPRI = KFPlayerReplicationInfo(KFPC.PlayerReplicationInfo);
+
+	return KFPRI;
 }
 
 public reliable client function WriteToChatLocalized(
@@ -284,7 +330,13 @@ private simulated function KeepNotification()
 		NotificationPercent);
 }
 
-private reliable server function Cleanup()
+private simulated function ClientCleanup()
+{
+	ServerCleanup();
+	SafeDestroy();
+}
+
+private reliable server function ServerCleanup()
 {
 	`Log_Trace();
 
