@@ -1,4 +1,5 @@
 class Unlocker extends Object
+	dependson(WeaponReplacements)
 	abstract;
 
 // TODO:
@@ -6,9 +7,8 @@ class Unlocker extends Object
 // without replacing KFGFxMoviePlayer_Manager
 // but how? 🤔
 
-const Trader = class'Trader';
-
-var private const Array<class<KFWeaponDefinition> > WeapDefDLCReplacements;
+const Trader       = class'Trader';
+const Replacements = class'WeaponReplacements';
 
 public static function bool IsValidTypeUnlockDLC(String UnlockType, E_LogLevel LogLevel)
 {
@@ -33,6 +33,7 @@ public static function bool UnlockDLC(
 	String UnlockType,
 	out Array<class<KFWeaponDefinition> > RemoveItems,
 	out Array<class<KFWeaponDefinition> > AddItems,
+	out BoolWrapper DLCSkinUpdateRequired,
 	E_LogLevel LogLevel)
 {
 	`Log_TraceStatic();
@@ -41,12 +42,14 @@ public static function bool UnlockDLC(
 	{
 		case "true":
 		case "auto":
-			return Auto(KFGI, KFGRI, RemoveItems, AddItems, LogLevel);
+			return Auto(KFGI, KFGRI, RemoveItems, AddItems, DLCSkinUpdateRequired, LogLevel);
 
 		case "replaceweapons":
+			DLCSkinUpdateRequired.Value = true;
 			return ReplaceWeapons(KFGRI, RemoveItems, AddItems, LogLevel);
 
 		case "replacefilter":
+			DLCSkinUpdateRequired.Value = false;
 			return ReplaceFilter(KFGI, LogLevel);
 
 		case "false":
@@ -60,6 +63,7 @@ private static function bool Auto(
 	KFGameReplicationInfo KFGRI,
 	out Array<class<KFWeaponDefinition> > RemoveItems,
 	out Array<class<KFWeaponDefinition> > AddItems,
+	out BoolWrapper DLCSkinUpdateRequired,
 	E_LogLevel LogLevel)
 {
 	local bool CustomGFxManager;
@@ -79,10 +83,12 @@ private static function bool Auto(
 
 	if (CustomGFxManager)
 	{
+		DLCSkinUpdateRequired.Value = true;
 		return ReplaceWeapons(KFGRI, RemoveItems, AddItems, LogLevel);
 	}
 	else
 	{
+		DLCSkinUpdateRequired.Value = false;
 		return ReplaceFilter(KFGI, LogLevel);
 	}
 }
@@ -99,6 +105,8 @@ private static function bool ReplaceWeapons(
 	local bool Unlock, PartialUnlock;
 
 	`Log_TraceStatic();
+
+	`Log_Debug("Unlock by replace weapons");
 
 	Unlock = false;
 	PartialUnlock = false;
@@ -139,15 +147,15 @@ private static function bool ReplaceWeapons(
 
 private static function class<KFWeaponDefinition> PickReplacementWeapDefDLC(class<KFWeaponDefinition> WeapDefDLC, E_LogLevel LogLevel)
 {
-	local class<KFWeaponDefinition> WeapDef;
+	local SWeapReplace WeapReplace;
 
 	`Log_TraceStatic();
 
-	foreach default.WeapDefDLCReplacements(WeapDef)
+	foreach Replacements.default.DLC(WeapReplace)
 	{
-		if (ClassIsChildOf(WeapDef, WeapDefDLC))
+		if (ClassIsChildOf(WeapReplace.WeapDef, WeapDefDLC))
 		{
-			return WeapDef;
+			return WeapReplace.WeapDef;
 		}
 	}
 
@@ -157,6 +165,8 @@ private static function class<KFWeaponDefinition> PickReplacementWeapDefDLC(clas
 private static function bool ReplaceFilter(KFGameInfo KFGI, E_LogLevel LogLevel)
 {
 	`Log_TraceStatic();
+
+	`Log_Debug("Unlock by replace filter");
 
 	if (KFGI == None) return false;
 
@@ -174,32 +184,5 @@ private static function bool ReplaceFilter(KFGameInfo KFGI, E_LogLevel LogLevel)
 
 defaultproperties
 {
-	WeapDefDLCReplacements.Add(class'CTI_WeapDef_AutoTurret')
-	WeapDefDLCReplacements.Add(class'CTI_WeapDef_BladedPistol')
-	WeapDefDLCReplacements.Add(class'CTI_WeapDef_Blunderbuss')
-	WeapDefDLCReplacements.Add(class'CTI_WeapDef_ChainBat')
-	WeapDefDLCReplacements.Add(class'CTI_WeapDef_ChiappaRhino')
-	WeapDefDLCReplacements.Add(class'CTI_WeapDef_ChiappaRhinoDual')
-	WeapDefDLCReplacements.Add(class'CTI_WeapDef_CompoundBow')
-	WeapDefDLCReplacements.Add(class'CTI_WeapDef_Doshinegun')
-	WeapDefDLCReplacements.Add(class'CTI_WeapDef_DualBladed')
-	WeapDefDLCReplacements.Add(class'CTI_WeapDef_FAMAS')
-	WeapDefDLCReplacements.Add(class'CTI_WeapDef_G18')
-	WeapDefDLCReplacements.Add(class'CTI_WeapDef_G36C')
-	WeapDefDLCReplacements.Add(class'CTI_WeapDef_GravityImploder')
-	WeapDefDLCReplacements.Add(class'CTI_WeapDef_HVStormCannon')
-	WeapDefDLCReplacements.Add(class'CTI_WeapDef_IonThruster')
-	WeapDefDLCReplacements.Add(class'CTI_WeapDef_Mine_Reconstructor')
-	WeapDefDLCReplacements.Add(class'CTI_WeapDef_Minigun')
-	WeapDefDLCReplacements.Add(class'CTI_WeapDef_MosinNagant')
-	WeapDefDLCReplacements.Add(class'CTI_WeapDef_ParasiteImplanter')
-	WeapDefDLCReplacements.Add(class'CTI_WeapDef_Pistol_DualG18')
-	WeapDefDLCReplacements.Add(class'CTI_WeapDef_Pistol_G18C')
-	WeapDefDLCReplacements.Add(class'CTI_WeapDef_Rifle_FrostShotgunAxe')
-	WeapDefDLCReplacements.Add(class'CTI_WeapDef_Scythe')
-	WeapDefDLCReplacements.Add(class'CTI_WeapDef_Shotgun_S12')
-	WeapDefDLCReplacements.Add(class'CTI_WeapDef_ShrinkRayGun')
-	WeapDefDLCReplacements.Add(class'CTI_WeapDef_ThermiteBore')
-	WeapDefDLCReplacements.Add(class'CTI_WeapDef_ZedMKIII')
-	WeapDefDLCReplacements.Add(class'CTI_WeapDef_Zweihander')
+
 }
