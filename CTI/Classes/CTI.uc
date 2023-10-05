@@ -35,6 +35,19 @@ var private Array<CTI_RepInfo> RepInfos;
 
 var private bool ReadyToSync;
 
+// To bypass "Booleans may not be out parameters" error
+struct BoolWrapper
+{
+	var bool Value;
+
+	structdefaultproperties
+	{
+		Value = false
+	}
+};
+
+var private BoolWrapper DLCSkinUpdateRequired;
+
 public simulated function bool SafeDestroy()
 {
 	`Log_Trace();
@@ -174,10 +187,11 @@ private function PostInit()
 		return;
 	}
 
-	if (Unlocker.static.UnlockDLC(KFGI, KFGRI, UnlockDLC, RemoveItems, AddItems, LogLevel))
+	if (Unlocker.static.UnlockDLC(KFGI, KFGRI, UnlockDLC, RemoveItems, AddItems, DLCSkinUpdateRequired, LogLevel))
 	{
 		`Log_Info("DLC unlocked");
 	}
+	`Log_Debug("DLCSkinUpdateRequired:" @ String(DLCSkinUpdateRequired.Value));
 
 	if (bPreloadContent)
 	{
@@ -280,7 +294,7 @@ public function bool CreateRepInfo(Controller C)
 
 	if (RepInfo == None) return false;
 
-	RepInfo.PrepareSync(Self, KFPlayerController(C), LogLevel);
+	RepInfo.PrepareSync(Self, KFPlayerController(C), LogLevel, DLCSkinUpdateRequired.Value);
 
 	RepInfos.AddItem(RepInfo);
 
