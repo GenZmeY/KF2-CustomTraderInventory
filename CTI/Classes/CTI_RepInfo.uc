@@ -21,6 +21,7 @@ var public  bool PendingSync;
 var private CTI CTI;
 var private E_LogLevel LogLevel;
 
+var private GameReplicationInfo     GRI;
 var private KFPlayerController      KFPC;
 var private KFPlayerReplicationInfo KFPRI;
 var private KFGFxWidget_PartyInGame PartyInGameWidget;
@@ -32,6 +33,7 @@ var private String NotificationRightText;
 var private int    NotificationPercent;
 
 var private int    WaitingGRI;
+var private int    WaitingGRIThreshold;
 var private int    WaitingGRILimit;
 
 var private ReplicationStruct                 RepData;
@@ -138,7 +140,7 @@ private simulated function Finished()
 
 	`Log_Trace();
 
-	if (WorldInfo.GRI == None && WaitingGRI++ < WaitingGRILimit)
+	if (GetGRI(WaitingGRI > WaitingGRIThreshold) == None && WaitingGRI++ < WaitingGRILimit)
 	{
 		`Log_Debug("Finished: Waiting GRI" @ WaitingGRI);
 		NotifyWaitingGRI();
@@ -146,7 +148,7 @@ private simulated function Finished()
 		return;
 	}
 
-	KFGRI = KFGameReplicationInfo(WorldInfo.GRI);
+	KFGRI = KFGameReplicationInfo(GRI);
 	if (KFGRI != None)
 	{
 		`Log_Debug("Finished: Trader.static.OverwriteTraderItems");
@@ -155,7 +157,7 @@ private simulated function Finished()
 	}
 	else
 	{
-		`Log_Error("Incompatible Replication info:" @ String(WorldInfo.GRI));
+		`Log_Error("Incompatible Replication info:" @ String(GRI));
 		NotifyIncompatibleGRI();
 	}
 
@@ -196,6 +198,29 @@ private simulated function UpdateSkinsDLC()
 		ClearTimer(nameof(UpdateSkinsDLC));
 		ClientCleanup();
 	}
+}
+
+private simulated function GameReplicationInfo GetGRI(optional bool ForcedSearch = false)
+{
+	`Log_Trace();
+
+	if (GRI == None)
+	{
+		GRI = WorldInfo.GRI;
+	}
+
+	if (GRI == None && ForcedSearch)
+	{
+		foreach WorldInfo.DynamicActors(class'GameReplicationInfo', GRI) break;
+	}
+
+	if (WorldInfo.GRI == None && GRI != None)
+	{
+		`Log_Warn("Force initialization of WorldInfo.GRI" @ String(GRI));
+		WorldInfo.GRI = GRI;
+	}
+
+	return GRI;
 }
 
 private simulated function KFPlayerController GetKFPC()
@@ -388,7 +413,7 @@ private simulated function NotifyIncompatibleGRI()
 	WriteToChatLocalized(
 		CTI_IncompatibleGRI,
 		class'KFLocalMessage'.default.InteractionColor,
-		String(WorldInfo.GRI.class));
+		String(GRI.class));
 	WriteToChatLocalized(
 		CTI_IncompatibleGRIWarning,
 		class'KFLocalMessage'.default.InteractionColor);
@@ -404,5 +429,6 @@ defaultproperties
 
 	NotificationPercent    = 0
 	WaitingGRI             = 0
+	WaitingGRIThreshold    = 15
 	WaitingGRILimit        = 30
 }
