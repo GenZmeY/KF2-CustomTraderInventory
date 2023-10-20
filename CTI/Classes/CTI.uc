@@ -187,18 +187,7 @@ private function PostInit()
 		return;
 	}
 
-	if (Unlocker.static.UnlockDLC(KFGI, KFGRI, UnlockDLC, RemoveItems, AddItems, DLCSkinUpdateRequired, LogLevel))
-	{
-		`Log_Info("DLC unlocked");
-	}
-	`Log_Debug("DLCSkinUpdateRequired:" @ String(DLCSkinUpdateRequired.Value));
-
-	if (bPreloadContent)
-	{
-		Preload(AddItems);
-	}
-
-	Trader.static.ModifyTrader(
+	WeapDefs = Trader.static.GenerateWeapDefList(
 		KFGRI,
 		RemoveItems,
 		AddItems,
@@ -208,7 +197,20 @@ private function PostInit()
 		bDisableItemLimitCheck,
 		LogLevel);
 
-	WeapDefs = Trader.static.GetTraderWeapDefs(KFGRI, LogLevel);
+	if (Unlocker.static.UnlockDLC(KFGI, KFGRI, UnlockDLC, WeapDefs, DLCSkinUpdateRequired, LogLevel))
+	{
+		`Log_Info("DLC unlocked");
+	}
+	`Log_Debug("DLCSkinUpdateRequired:" @ String(DLCSkinUpdateRequired.Value));
+
+	Trader.static.OverwriteTraderItems(KFGRI, WeapDefs, LogLevel);
+
+	`Log_Info("Trader items:" @ WeapDefs.Length);
+
+	if (bPreloadContent)
+	{
+		Preload(WeapDefs);
+	}
 
 	ReadyToSync = true;
 

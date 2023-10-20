@@ -332,6 +332,7 @@ private simulated function KeepNotification()
 
 private simulated function ClientCleanup()
 {
+	`Log_Debug("Cleanup");
 	ServerCleanup();
 	SafeDestroy();
 }
@@ -340,7 +341,7 @@ private reliable server function ServerCleanup()
 {
 	`Log_Trace();
 
-	`Log_Debug("Cleanup");
+	`Log_Debug("Cleanup" @ GetKFPC() @ GetKFPRI() == None? "" : GetKFPRI().PlayerName);
 	if (!CTI.DestroyRepInfo(GetKFPC()))
 	{
 		`Log_Debug("Cleanup (forced)");
