@@ -91,11 +91,11 @@ public static function Array<class<KFWeaponDefinition> > GetTraderWeapDefsDLC(KF
 	return WeapDefs;
 }
 
-public static simulated function ModifyTrader(
+public static simulated function Array< class<KFWeaponDefinition> > GenerateWeapDefList(
 	KFGameReplicationInfo KFGRI,
 	const out Array<class<KFWeaponDefinition> > RemoveItems,
 	const out Array<class<KFWeaponDefinition> > AddItems,
-	bool ReplaceMode,
+	bool RemoveAll,
 	bool RemoveHRG,
 	bool RemoveDLC,
 	bool bDisableItemLimitCheck,
@@ -103,14 +103,14 @@ public static simulated function ModifyTrader(
 {
 	local KFGFxObject_TraderItems TraderItems;
 	local STraderItem Item;
-	local Array<class<KFWeaponDefinition> > WeapDefs;
+	local Array< class<KFWeaponDefinition> > WeapDefs;
 	local int Index;
 
 	`Log_TraceStatic();
 
 	TraderItems = GetTraderItems(KFGRI, LogLevel);
 
-	if (!ReplaceMode)
+	if (!RemoveAll)
 	{
 		foreach TraderItems.SaleItems(Item)
 		{
@@ -127,7 +127,10 @@ public static simulated function ModifyTrader(
 
 	for (Index = 0; Index < AddItems.Length; ++Index)
 	{
-		WeapDefs.AddItem(AddItems[Index]);
+		if (WeaponClassIsUnique(AddItems[Index].default.WeaponClassPath, WeapDefs, LogLevel))
+		{
+			WeapDefs.AddItem(AddItems[Index]);
+		}
 	}
 
 	WeapDefs.Sort(ByPrice);
@@ -143,7 +146,7 @@ public static simulated function ModifyTrader(
 		WeapDefs.Length = ITEMS_LIMIT;
 	}
 
-	OverwriteTraderItems(KFGRI, WeapDefs, LogLevel);
+	return WeapDefs;
 }
 
 public static simulated function OverwriteTraderItems(

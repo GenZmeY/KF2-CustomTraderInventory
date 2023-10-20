@@ -31,8 +31,7 @@ public static function bool UnlockDLC(
 	KFGameInfo KFGI,
 	KFGameReplicationInfo KFGRI,
 	String UnlockType,
-	out Array<class<KFWeaponDefinition> > RemoveItems,
-	out Array<class<KFWeaponDefinition> > AddItems,
+	out Array<class<KFWeaponDefinition> > WeapDefs,
 	out BoolWrapper DLCSkinUpdateRequired,
 	E_LogLevel LogLevel)
 {
@@ -42,11 +41,10 @@ public static function bool UnlockDLC(
 	{
 		case "true":
 		case "auto":
-			return Auto(KFGI, KFGRI, RemoveItems, AddItems, DLCSkinUpdateRequired, LogLevel);
+			return Auto(KFGI, KFGRI, WeapDefs, DLCSkinUpdateRequired, LogLevel);
 
 		case "replaceweapons":
-			DLCSkinUpdateRequired.Value = true;
-			return ReplaceWeapons(KFGRI, RemoveItems, AddItems, LogLevel);
+			return ReplaceWeapons(KFGRI, WeapDefs, DLCSkinUpdateRequired, LogLevel);
 
 		case "replacefilter":
 			DLCSkinUpdateRequired.Value = false;
@@ -61,8 +59,7 @@ public static function bool UnlockDLC(
 private static function bool Auto(
 	KFGameInfo KFGI,
 	KFGameReplicationInfo KFGRI,
-	out Array<class<KFWeaponDefinition> > RemoveItems,
-	out Array<class<KFWeaponDefinition> > AddItems,
+	out Array<class<KFWeaponDefinition> > WeapDefs,
 	out BoolWrapper DLCSkinUpdateRequired,
 	E_LogLevel LogLevel)
 {
@@ -83,8 +80,7 @@ private static function bool Auto(
 
 	if (CustomGFxManager)
 	{
-		DLCSkinUpdateRequired.Value = true;
-		return ReplaceWeapons(KFGRI, RemoveItems, AddItems, LogLevel);
+		return ReplaceWeapons(KFGRI, WeapDefs, DLCSkinUpdateRequired, LogLevel);
 	}
 	else
 	{
@@ -95,14 +91,14 @@ private static function bool Auto(
 
 private static function bool ReplaceWeapons(
 	KFGameReplicationInfo KFGRI,
-	out Array<class<KFWeaponDefinition> > RemoveItems,
-	out Array<class<KFWeaponDefinition> > AddItems,
+	out Array<class<KFWeaponDefinition> > WeapDefs,
+	out BoolWrapper DLCSkinUpdateRequired,
 	E_LogLevel LogLevel)
 {
-	local Array<class<KFWeaponDefinition> > WeapDefsDLCs;
-	local class<KFWeaponDefinition> WeapDefDLC;
+	local class<KFWeaponDefinition> WeapDef;
 	local class<KFWeaponDefinition> WeapDefReplacement;
 	local bool Unlock, PartialUnlock;
+	local int Index;
 
 	`Log_TraceStatic();
 
@@ -110,30 +106,34 @@ private static function bool ReplaceWeapons(
 
 	Unlock = false;
 	PartialUnlock = false;
+	DLCSkinUpdateRequired.Value = false;
 
-	WeapDefsDLCs = Trader.static.GetTraderWeapDefsDLC(KFGRI, LogLevel);
-
-	foreach WeapDefsDLCs(WeapDefDLC)
+	for (Index = 0; Index < WeapDefs.Length; Index++)
 	{
-		WeapDefReplacement = PickReplacementWeapDefDLC(WeapDefDLC, LogLevel);
+		WeapDef = WeapDefs[Index];
+
+		if (WeapDef.default.SharedUnlockId == SCU_None) continue;
+
+		WeapDefReplacement = PickReplacementWeapDefDLC(WeapDef, LogLevel);
 		if (WeapDefReplacement != None)
 		{
 			Unlock = true;
-			if (AddItems.Find(WeapDefReplacement) == INDEX_NONE)
+			DLCSkinUpdateRequired.Value = true;
+			if (WeapDefs.Find(WeapDefReplacement) == INDEX_NONE)
 			{
-				AddItems.AddItem(WeapDefReplacement);
+				WeapDefs[Index] = WeapDefReplacement;
+				`Log_Debug(WeapDef @ "replaced by" @ WeapDefReplacement);
 			}
-			`Log_Debug(WeapDefDLC @ "replaced by" @ WeapDefReplacement);
+			else
+			{
+				WeapDefs.Remove(Index--, 1);
+				`Log_Debug("Skip already unlocked weapon:" @ WeapDef);
+			}
 		}
 		else
 		{
 			PartialUnlock = true;
-			`Log_Warn("Can't unlock item:" @ WeapDefDLC @ "SharedUnlockId:" @ WeapDefDLC.default.SharedUnlockId);
-		}
-
-		if (RemoveItems.Find(WeapDefDLC) == INDEX_NONE)
-		{
-			RemoveItems.AddItem(WeapDefDLC);
+			`Log_Warn("Can't unlock item:" @ WeapDef @ "SharedUnlockId:" @ WeapDef.default.SharedUnlockId);
 		}
 	}
 
