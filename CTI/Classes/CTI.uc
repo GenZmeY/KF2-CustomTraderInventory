@@ -197,6 +197,9 @@ private function PostInit()
 		bDisableItemLimitCheck,
 		LogLevel);
 
+	RemoveItems.Length = 0;
+	AddItems.Length = 0;
+
 	if (Unlocker.static.UnlockDLC(KFGI, KFGRI, UnlockDLC, WeapDefs, DLCSkinUpdateRequired, LogLevel))
 	{
 		`Log_Info("DLC unlocked");
