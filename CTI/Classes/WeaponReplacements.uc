@@ -103,6 +103,12 @@ defaultproperties
 		WeapParent=class'KFWeap_Edged_IonThruster'
 	)})
 	DLC.Add({(
+		WeapDef=class'CTI_WeapDef_MG3',
+		WeapDefParent=class'KFWeapDef_MG3',
+		Weap=class'CTI_Weap_LMG_MG3',
+		WeapParent=class'KFWeap_LMG_MG3'
+	)})
+	DLC.Add({(
 		WeapDef=class'CTI_WeapDef_Mine_Reconstructor',
 		WeapDefParent=class'KFWeapDef_Mine_Reconstructor',
 		Weap=class'CTI_Weap_Mine_Reconstructor',
