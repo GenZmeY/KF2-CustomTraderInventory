@@ -180,7 +180,13 @@ private simulated function UpdateSkinsDLC()
 	{
 		foreach Replacements.default.DLC(WeapReplace)
 		{
-			if (WeapReplace.WeapParent.default.SkinItemId > 0 && WeapReplace.Weap.default.SkinItemId != WeapReplace.WeapParent.default.SkinItemId)
+			// sometimes "WeapReplace.Weap.default.SkinItemId" can give values greater than zero while actually being zero
+			// this is the same bug that prevents creating the correct default config
+			// so for now let’s shorten the check a little so that the skinId of the WeapReplace is guaranteed to be correct
+			// but if this bug is ever fixed, then it’s worth replacing the check with this one:
+			// if (WeapReplace.WeapParent.default.SkinItemId > 0 && WeapReplace.Weap.default.SkinItemId != WeapReplace.WeapParent.default.SkinItemId)
+			// to reduce the number of meaningless disk writes
+			if (WeapReplace.WeapParent.default.SkinItemId > 0)
 			{
 				`Log_Debug("Update skin for:" @ String(WeapReplace.WeapDef) @ "SkinId:" @ WeapReplace.WeapParent.default.SkinItemId);
 				class'KFWeaponSkinList'.static.SaveWeaponSkin(WeapReplace.WeapDef, WeapReplace.WeapParent.default.SkinItemId);
