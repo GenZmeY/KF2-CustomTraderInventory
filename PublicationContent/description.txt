@@ -17,7 +17,7 @@ No. This mod is not whitelisted and will de-rank your server. Any XP gained will
 [*]Subscribe to this mutator;
 [*]Start KF2;
 [*]Open console (~) and input:
-[b]open KF-BioticsLab?Mutator=CTI.CTIMut[/b]
+[b]open KF-BioticsLab?Mutator=CTI.Mut[/b]
 (replace the map and add the parameters you need)
 [*]<Enter>.
 [/olist]
@@ -31,7 +31,7 @@ No. This mod is not whitelisted and will de-rank your server. Any XP gained will
 [*]Add the following string to the [b][OnlineSubsystemSteamworks.KFWorkshopSteamworks][/b] section (create one if it doesn't exist):
 [b]ServerSubscribedWorkshopItems=2830826239[/b]
 [*]Start the server and wait while the mutator is downloading;
-[*]Add mutator to server start parameters: [b]?Mutator=CTI.CTIMut[/b] and restart the server.
+[*]Add mutator to server start parameters: [b]?Mutator=CTI.Mut[/b] and restart the server.
 [/olist]
 
 [h1]Important setup information[/h1]
