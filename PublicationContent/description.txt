@@ -6,7 +6,9 @@
 [*]can preload weapon models (no lags when someone buys weapons);
 [*]unlock DLC weapons;
 [*]correct items sorting (by price);
-[*]don't have to worry about adding new guns after each KF2 update.
+[*]don't have to worry about adding new guns after each KF2 update;
+[*]add an unlimited number of items to the trader;
+[*]sell weapons excluded from trader inventory.
 [/list]
 
 [h1]Whitelisted?[/h1]
@@ -49,7 +51,11 @@ Unfortunately I can't do anything about it because it's a game problem (not muta
 
 [h1]Setup (KFCTI.ini)[/h1]
 [list]
-[*]Set [b]bPreloadContent=True[/b] to load weapon models in advance and have no lags during the game.
+[*][b]bDisableItemLimitCheck[/b]: The original game does not support more than 256 trader items, adding items above this limit causes bugs. If this problem is solved then it can be set [b]bDisableItemLimitCheck=True[/b], otherwise it is better to leave it "[b]False[/b]".
+
+[*]Set [b]bApplyPatch=True[/b] to fix some base classes of the game allowing you to sell removed weapons and add an unlimited number of items to the trader.
+
+[*]Set [b]bPreloadContent=True[/b] to load weapon models in advance and have no lags during the game. In some cases (usually if there is a lot of custom content), enabling preload can cause models to disappear. It is recommended to test how this setting affects the game for your server configuration and then decide whether to enable preloading or not.
 
 [*]Set [b]bOfficialWeaponsList=True[/b] to have an auto-updated list of all official weapons in the config (for a convenient copy-paste).
 
