@@ -154,16 +154,19 @@ public static simulated function OverwriteTraderItems(
 	const out Array<class<KFWeaponDefinition> > WeapDefs,
 	E_LogLevel LogLevel)
 {
-	local KFGFxObject_TraderItems TraderItems;
+	local CTI_GFxObject_TraderItems TraderItemsCTI;
+	local KFGFxObject_TraderItems TraderItemsDef;
 	local STraderItem Item;
 	local class<KFWeaponDefinition> WeapDef;
 	local int MaxItemID;
 
 	`Log_TraceStatic();
 
-	TraderItems = GetTraderItems(KFGRI, LogLevel);
+	TraderItemsDef = GetTraderItems(KFGRI, LogLevel);
+	TraderItemsCTI = new class'CTI_GFxObject_TraderItems';
+	TraderItemsCTI.AllItems = TraderItemsDef.SaleItems;
 
-	TraderItems.SaleItems.Length = 0;
+	TraderItemsCTI.SaleItems.Length = 0;
 	MaxItemID = 0;
 
 	`Log_Debug("Trader Items:");
@@ -171,13 +174,21 @@ public static simulated function OverwriteTraderItems(
 	{
 		Item.WeaponDef = WeapDef;
 		Item.ItemID = MaxItemID++;
-		TraderItems.SaleItems.AddItem(Item);
+		TraderItemsCTI.SaleItems.AddItem(Item);
+		TraderItemsCTI.AllItems.AddItem(Item);
 		`Log_Debug("[" $ MaxItemID $ "]" @ String(WeapDef));
 	}
 
-	TraderItems.SetItemsInfo(TraderItems.SaleItems);
+	foreach TraderItemsDef.SaleItems(Item)
+	{
+		Item.ItemID = MaxItemID++;
+		TraderItemsCTI.AllItems.AddItem(Item);
+	}
 
-	KFGRI.TraderItems = TraderItems;
+	TraderItemsCTI.SetItemsInfo(TraderItemsCTI.SaleItems);
+	TraderItemsCTI.SetItemsInfo(TraderItemsCTI.AllItems);
+
+	KFGRI.TraderItems = TraderItemsCTI;
 }
 
 private static function bool WeaponClassIsUnique(String WeaponClassPath, const out Array<class<KFWeaponDefinition> > WeapDefs, E_LogLevel LogLevel)

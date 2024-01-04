@@ -3,9 +3,11 @@ class CTI_RepInfo extends ReplicationInfo
 
 const CAPACITY = 64; // max: 128
 
-const Trader       = class'Trader';
-const LocalMessage = class'CTI_LocalMessage';
-const Replacements = class'WeaponReplacements';
+const Trader             = class'Trader';
+const LocalMessage       = class'CTI_LocalMessage';
+const Replacements       = class'WeaponReplacements';
+const PurchaseHelper     = class'CTI_AutoPurchaseHelper';
+const InventoryManager   = class'CTI_InventoryManager';
 
 struct ReplicationStruct
 {
@@ -40,11 +42,14 @@ var private ReplicationStruct                 RepData;
 var private Array<class<KFWeaponDefinition> > RepArray;
 
 var private bool SkinUpdateRequired;
+var private bool PatchRequired;
+
+var private bool ClientReady, ServerReady;
 
 replication
 {
 	if (bNetInitial && Role == ROLE_Authority)
-		LogLevel, SkinUpdateRequired;
+		LogLevel, SkinUpdateRequired, PatchRequired;
 }
 
 public simulated function bool SafeDestroy()
@@ -54,9 +59,35 @@ public simulated function bool SafeDestroy()
 	return (bPendingDelete || bDeleteMe || Destroy());
 }
 
+public function PrepareSync(
+	CTI _CTI, KFPlayerController _KFPC, E_LogLevel _LogLevel,
+	bool _SkinUpdateRequired, bool _PatchRequired)
+{
+	`Log_Trace();
+
+	CTI                      = _CTI;
+	KFPC                     = _KFPC;
+	LogLevel                 = _LogLevel;
+	SkinUpdateRequired       = _SkinUpdateRequired;
+	PatchRequired            = _PatchRequired;
+}
+
 public function Replicate(const out Array<class<KFWeaponDefinition> > WeapDefs)
 {
 	`Log_Trace();
+
+	ServerReady = !PatchRequired;
+
+	if (PatchRequired)
+	{
+		if (GetKFPC() != None)
+		{
+			KFPC.PurchaseHelperClass = PurchaseHelper;
+			KFPC.PurchaseHelper = None;
+		}
+
+		InitInventoryManager();
+	}
 
 	RepArray = WeapDefs;
 	RepData.Size = RepArray.Length;
@@ -111,16 +142,6 @@ private reliable client function Send(ReplicationStruct RD)
 	Sync();
 }
 
-public function PrepareSync(CTI _CTI, KFPlayerController _KFPC, E_LogLevel _LogLevel, bool _SkinUpdateRequired)
-{
-	`Log_Trace();
-
-	CTI                = _CTI;
-	KFPC               = _KFPC;
-	LogLevel           = _LogLevel;
-	SkinUpdateRequired = _SkinUpdateRequired;
-}
-
 private simulated function Progress(int Value, int Size)
 {
 	`Log_Trace();
@@ -140,12 +161,18 @@ private simulated function Finished()
 
 	`Log_Trace();
 
-	if (GetGRI(WaitingGRI > WaitingGRIThreshold) == None && WaitingGRI++ < WaitingGRILimit)
+	if ((GetGRI(WaitingGRI > WaitingGRIThreshold) == None) && WaitingGRI++ < WaitingGRILimit)
 	{
 		`Log_Debug("Finished: Waiting GRI" @ WaitingGRI);
 		NotifyWaitingGRI();
 		SetTimer(1.0f, false, nameof(Finished));
 		return;
+	}
+
+	if (PatchRequired && GetKFPC() != None)
+	{
+		KFPC.PurchaseHelperClass = PurchaseHelper;
+		KFPC.PurchaseHelper = None;
 	}
 
 	KFGRI = KFGameReplicationInfo(GRI);
@@ -165,39 +192,42 @@ private simulated function Finished()
 
 	if (SkinUpdateRequired)
 	{
-		SetTimer(1.0f, true, nameof(UpdateSkinsDLC));
+		SkinUpdate();
 	}
 	else
 	{
-		ClientCleanup();
+		ClientFinished();
 	}
 }
 
-private simulated function UpdateSkinsDLC()
+private simulated function SkinUpdate()
 {
 	local SWeapReplace WeapReplace;
 
-	`Log_Debug("Wait for spawn");
-	if (GetKFPRI() != None && KFPRI.bHasSpawnedIn)
+	if (GetKFPRI() == None || !KFPRI.bHasSpawnedIn)
 	{
-		foreach Replacements.default.DLC(WeapReplace)
-		{
-			// sometimes "WeapReplace.Weap.default.SkinItemId" can give values greater than zero while actually being zero
-			// this is the same bug that prevents creating the correct default config
-			// so for now let’s shorten the check a little so that the skinId of the WeapReplace is guaranteed to be correct
-			// but if this bug is ever fixed, then it’s worth replacing the check with this one:
-			// if (WeapReplace.WeapParent.default.SkinItemId > 0 && WeapReplace.Weap.default.SkinItemId != WeapReplace.WeapParent.default.SkinItemId)
-			// to reduce the number of meaningless disk writes
-			if (WeapReplace.WeapParent.default.SkinItemId > 0)
-			{
-				`Log_Debug("Update skin for:" @ String(WeapReplace.WeapDef) @ "SkinId:" @ WeapReplace.WeapParent.default.SkinItemId);
-				class'KFWeaponSkinList'.static.SaveWeaponSkin(WeapReplace.WeapDef, WeapReplace.WeapParent.default.SkinItemId);
-			}
-		}
-
-		ClearTimer(nameof(UpdateSkinsDLC));
-		ClientCleanup();
+		`Log_Debug("Wait for spawn (SkinUpdate)");
+		SetTimer(1.0f, false, nameof(SkinUpdate));
+		return;
 	}
+
+	foreach Replacements.default.DLC(WeapReplace)
+	{
+		// sometimes "WeapReplace.Weap.default.SkinItemId" can give values greater than zero while actually being zero
+		// this is the same bug that prevents creating the correct default config
+		// so for now let’s shorten the check a little so that the skinId of the WeapReplace is guaranteed to be correct
+		// but if this bug is ever fixed, then it’s worth replacing the check with this one:
+		// if (WeapReplace.WeapParent.default.SkinItemId > 0 && WeapReplace.Weap.default.SkinItemId != WeapReplace.WeapParent.default.SkinItemId)
+		// to reduce the number of meaningless disk writes
+		if (WeapReplace.WeapParent.default.SkinItemId > 0)
+		{
+			`Log_Debug("Update skin for:" @ String(WeapReplace.WeapDef) @ "SkinId:" @ WeapReplace.WeapParent.default.SkinItemId);
+			class'KFWeaponSkinList'.static.SaveWeaponSkin(WeapReplace.WeapDef, WeapReplace.WeapParent.default.SkinItemId);
+		}
+	}
+
+	ClearTimer(nameof(SkinUpdate));
+	ClientFinished();
 }
 
 private simulated function GameReplicationInfo GetGRI(optional bool ForcedSearch = false)
@@ -361,14 +391,19 @@ private simulated function KeepNotification()
 		NotificationPercent);
 }
 
-private simulated function ClientCleanup()
+private reliable server function ClientFinished()
 {
-	`Log_Debug("Cleanup");
-	ServerCleanup();
-	SafeDestroy();
+	ClientReady = true;
+	if (ClientReady && ServerReady) Cleanup();
 }
 
-private reliable server function ServerCleanup()
+private function ServerFinished()
+{
+	ServerReady = true;
+	if (ClientReady && ServerReady) Cleanup();
+}
+
+private reliable server function Cleanup()
 {
 	`Log_Trace();
 
@@ -378,6 +413,69 @@ private reliable server function ServerCleanup()
 		`Log_Debug("Cleanup (forced)");
 		SafeDestroy();
 	}
+}
+
+public function InitInventoryManager()
+{
+	local InventoryManager PrevInventoryManger;
+	local InventoryManager NextInventoryManger;
+
+	local KFInventoryManager PrevKFInventoryManger;
+	local KFInventoryManager NextKFInventoryManger;
+
+	local Inventory Item;
+
+	`Log_Trace();
+
+	if (GetKFPRI() == None || !KFPRI.bHasSpawnedIn)
+	{
+		`Log_Debug("Wait for spawn (InventoryManager)");
+		SetTimer(1.0f, false, nameof(InitInventoryManager));
+		return;
+	}
+
+	PrevInventoryManger = KFPC.Pawn.InvManager;
+
+	KFPC.Pawn.InventoryManagerClass = InventoryManager;
+	NextInventoryManger = Spawn(KFPC.Pawn.InventoryManagerClass, KFPC.Pawn);
+
+	if (NextInventoryManger == None)
+	{
+		`Log_Error("Can't spawn" @ String(KFPC.Pawn.InventoryManagerClass));
+		ServerFinished();
+		return;
+	}
+
+	KFPC.Pawn.InvManager = NextInventoryManger;
+	KFPC.Pawn.InvManager.SetupFor(KFPC.Pawn);
+
+	if (PrevInventoryManger == None)
+	{
+		KFPC.Pawn.AddDefaultInventory();
+	}
+	else
+	{
+		for (Item = PrevInventoryManger.InventoryChain; Item != None; Item = PrevInventoryManger.InventoryChain)
+		{
+			PrevInventoryManger.RemoveFromInventory(Item);
+			NextInventoryManger.AddInventory(Item);
+		}
+	}
+
+	PrevKFInventoryManger = KFInventoryManager(PrevInventoryManger);
+	NextKFInventoryManger = KFInventoryManager(NextInventoryManger);
+
+	if (PrevKFInventoryManger != None && NextKFInventoryManger != None)
+	{
+		NextKFInventoryManger.GrenadeCount = PrevKFInventoryManger.GrenadeCount;
+	}
+
+	PrevKFInventoryManger.InventoryChain = None;
+	PrevKFInventoryManger.Destroy();
+
+	`Log_Debug("InventoryManager initialized");
+
+	ServerFinished();
 }
 
 private simulated function NotifyWaitingGRI()
@@ -431,4 +529,7 @@ defaultproperties
 	WaitingGRI             = 0
 	WaitingGRIThreshold    = 15
 	WaitingGRILimit        = 30
+
+	ClientReady = false
+	ServerReady = false
 }

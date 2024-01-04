@@ -63,22 +63,11 @@ private static function bool Auto(
 	out BoolWrapper DLCSkinUpdateRequired,
 	E_LogLevel LogLevel)
 {
-	local bool CustomGFxManager;
-
 	`Log_TraceStatic();
 
 	if (KFGI == None) return false;
 
-	if (KFGameInfo_VersusSurvival(KFGI) != None)
-	{
-		CustomGFxManager = (KFGI.KFGFxManagerClass != class'KFGameInfo_VersusSurvival'.default.KFGFxManagerClass);
-	}
-	else
-	{
-		CustomGFxManager = (KFGI.KFGFxManagerClass != class'KFGameInfo'.default.KFGFxManagerClass);
-	}
-
-	if (CustomGFxManager)
+	if (CustomGFxManager(KFGI))
 	{
 		return ReplaceWeapons(KFGRI, WeapDefs, DLCSkinUpdateRequired, LogLevel);
 	}
@@ -86,6 +75,18 @@ private static function bool Auto(
 	{
 		DLCSkinUpdateRequired.Value = false;
 		return ReplaceFilter(KFGI, LogLevel);
+	}
+}
+
+public static function bool CustomGFxManager(KFGameInfo KFGI)
+{
+	if (KFGameInfo_VersusSurvival(KFGI) != None)
+	{
+		return (KFGI.KFGFxManagerClass != class'KFGameInfo_VersusSurvival'.default.KFGFxManagerClass);
+	}
+	else
+	{
+		return (KFGI.KFGFxManagerClass != class'KFGameInfo'.default.KFGFxManagerClass);
 	}
 }
 
@@ -170,13 +171,18 @@ private static function bool ReplaceFilter(KFGameInfo KFGI, E_LogLevel LogLevel)
 
 	if (KFGI == None) return false;
 
+	if (CustomGFxManager(KFGI))
+	{
+		`Log_Warn("Custom KFGFxMoviePlayer_Manager detected:" @ String(KFGI.KFGFxManagerClass) $ ". There may be compatibility issues.");
+	}
+
 	if (KFGameInfo_VersusSurvival(KFGI) != None)
 	{
-		KFGI.KFGFxManagerClass = class'CTI_GFxMoviePlayer_Manager_Versus';
+		KFGI.KFGFxManagerClass = class'CTI_GFxMoviePlayer_Manager_Versus_DLC';
 	}
 	else
 	{
-		KFGI.KFGFxManagerClass = class'CTI_GFxMoviePlayer_Manager';
+		KFGI.KFGFxManagerClass = class'CTI_GFxMoviePlayer_Manager_DLC';
 	}
 
 	return true;

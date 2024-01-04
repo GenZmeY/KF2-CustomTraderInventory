@@ -1,7 +1,7 @@
 class CTI extends Info
 	config(CTI);
 
-const LatestVersion = 4;
+const LatestVersion = 5;
 
 const CfgRemoveItems     = class'RemoveItems';
 const CfgAddItems        = class'AddItems';
@@ -23,6 +23,7 @@ var private config String     UnlockDLC;
 var private config bool       bPreloadContent;
 var private config bool       bOfficialWeaponsList;
 var private config bool       bDisableItemLimitCheck;
+var private config bool       bApplyPatch;
 
 var private KFGameInfo            KFGI;
 var private KFGameReplicationInfo KFGRI;
@@ -110,6 +111,9 @@ private function PreInit()
 		case 2:
 		case 3:
 			bDisableItemLimitCheck = false;
+
+		case 4:
+			bApplyPatch = false;
 
 		case MaxInt:
 			`Log_Info("Config updated to version" @ LatestVersion);
@@ -206,6 +210,11 @@ private function PostInit()
 	}
 	`Log_Debug("DLCSkinUpdateRequired:" @ String(DLCSkinUpdateRequired.Value));
 
+	if (bApplyPatch)
+	{
+		ServerPatch();
+	}
+
 	Trader.static.OverwriteTraderItems(KFGRI, WeapDefs, LogLevel);
 
 	`Log_Info("Trader items:" @ WeapDefs.Length);
@@ -223,6 +232,41 @@ private function PostInit()
 		{
 			RepInfo.Replicate(WeapDefs);
 		}
+	}
+}
+
+private function ServerPatch()
+{
+	local class<KFAutoPurchaseHelper> AutoPurchaseHelper;
+	local class<KFInventoryManager> InventoryManager;
+
+	if (KFGI.KFGFxManagerClass.GetPackageName() != 'CTI')
+	{
+		if (Unlocker.static.CustomGFxManager(KFGI))
+		{
+			`Log_Warn("Custom KFGFxMoviePlayer_Manager detected:" @ String(KFGI.KFGFxManagerClass) $ ". There may be compatibility issues.");
+		}
+
+		if (KFGameInfo_VersusSurvival(KFGI) != None)
+		{
+			KFGI.KFGFxManagerClass = class'CTI_GFxMoviePlayer_Manager_Versus';
+		}
+		else
+		{
+			KFGI.KFGFxManagerClass = class'CTI_GFxMoviePlayer_Manager';
+		}
+	}
+
+	AutoPurchaseHelper = class<KFPlayerController>(KFGI.PlayerControllerClass).default.PurchaseHelperClass;
+	if (AutoPurchaseHelper != class'KFPlayerController'.default.PurchaseHelperClass)
+	{
+		`Log_Warn("Custom PurchaseHelperClass detected:" @ String(AutoPurchaseHelper) $ ". There may be compatibility issues.");
+	}
+
+	InventoryManager = class<KFInventoryManager>(KFGI.DefaultPawnClass.default.InventoryManagerClass);
+	if (InventoryManager != class'KFPawn'.default.InventoryManagerClass)
+	{
+		`Log_Warn("Custom InventoryManagerClass detected:" @ String(InventoryManager) $ ". There may be compatibility issues.");
 	}
 }
 
@@ -299,7 +343,7 @@ public function bool CreateRepInfo(Controller C)
 
 	if (RepInfo == None) return false;
 
-	RepInfo.PrepareSync(Self, KFPlayerController(C), LogLevel, DLCSkinUpdateRequired.Value);
+	RepInfo.PrepareSync(Self, KFPlayerController(C), LogLevel, DLCSkinUpdateRequired.Value, bApplyPatch);
 
 	RepInfos.AddItem(RepInfo);
 
