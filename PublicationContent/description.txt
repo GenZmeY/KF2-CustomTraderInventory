@@ -1,5 +1,8 @@
 [img]https://img.shields.io/static/v1?logo=GitHub&labelColor=gray&color=blue&logoColor=white&label=&message=Open Source[/img] [img]https://img.shields.io/github/license/GenZmeY/KF2-CustomTraderInventory[/img] [img]https://img.shields.io/steam/downloads/2830826239[/img] [img]https://img.shields.io/steam/favorites/2830826239[/img] [img]https://img.shields.io/steam/update-date/2830826239[/img] [url=https://steamcommunity.com/sharedfiles/filedetails/changelog/2830826239][img]https://img.shields.io/github/v/tag/GenZmeY/KF2-CustomTraderInventory[/img][/url]
 
+[h1]Description[/h1]
+Trader inventory management
+
 [h1]Features[/h1]
 [list]
 [*]remove/add items to trader;
@@ -18,6 +21,10 @@ No. This mod is not whitelisted and will de-rank your server. Any XP gained will
 [olist]
 [*]Subscribe to this mutator;
 [*]Start KF2;
+[*]Create a file [b](*)[/b]: [b]C:\Users\<username>\Documents\My Games\KillingFloor2\KFGame\Config\KFCTI.ini[/b]
+with the following content:
+[b][CTI.CTI]
+Version=0[/b]
 [*]Open console (~) and input:
 [b]open KF-BioticsLab?Mutator=CTI.Mut[/b]
 (replace the map and add the parameters you need)
@@ -33,12 +40,15 @@ No. This mod is not whitelisted and will de-rank your server. Any XP gained will
 [*]Add the following string to the [b][OnlineSubsystemSteamworks.KFWorkshopSteamworks][/b] section (create one if it doesn't exist):
 [b]ServerSubscribedWorkshopItems=2830826239[/b]
 [*]Start the server and wait while the mutator is downloading;
+[*]Create a file [b](*)[/b]: [b]<kf2-server>\KFGame\Config\KFCTI.ini[/b]
+with the following content:
+[b][CTI.CTI]
+Version=0[/b]
 [*]Add mutator to server start parameters: [b]?Mutator=CTI.Mut[/b] and restart the server.
 [/olist]
 
-[h1]Important setup information[/h1]
-The config should be created on first start, but now the game contains a bug that initializes the config values ​​randomly if they are not explicitly set. Thus, the config may have incorrect values ​​or not be created at all.
-So if you are using this mutator for the first time, I highly recommend doing the following:
+[h1][b](*)[/b] Buggy variable initialization[/h1]
+The config should be created on first start, but now the game contains a bug that initializes the config values ​​randomly if they are not explicitly set.Thus, the config may have incorrect values ​​or not be created at all. So if you are using this mutator for the first time, I highly recommend doing the following:
 [olist]
 [*]Create (modify) [b]KFCTI.ini[/b] manually. Put the following content there:
 [b][CTI.CTI]
@@ -51,9 +61,9 @@ Unfortunately I can't do anything about it because it's a game problem (not muta
 
 [h1]Setup (KFCTI.ini)[/h1]
 [list]
-[*][b]bDisableItemLimitCheck[/b]: The original game does not support more than 256 trader items, adding items above this limit causes bugs. If this problem is solved then it can be set [b]bDisableItemLimitCheck=True[/b], otherwise it is better to leave it "[b]False[/b]".
+[*][b]bDisableItemLimitCheck[/b]: The original game does not support more than 256 trader items, adding items above this limit causes bugs. If this problem is solved (For example, if you are using a mutator that has already fixed this problem or by enabling [b]bApplyPatch[/b]) then it can be set [b]bDisableItemLimitCheck=True[/b] to remove the limit, otherwise it is better to leave it "[b]False[/b]".
 
-[*]Set [b]bApplyPatch=True[/b] to fix some base classes of the game allowing you to sell removed weapons and add an unlimited number of items to the trader.
+[*]Set [b]bApplyPatch=True[/b] to fix some base classes of the game: this fixes problems when adding more than 256 items to a trader and will allow weapons that have been removed from sale to be sold. Note that enabling this parameter replaces the following classes: KFAutoPurchaseHelper, KFInventoryManager, KFGFxMenu_Trader, KFGFxObject_TraderItems. There may be compatibility issues with mutators that also replace them.
 
 [*]Set [b]bPreloadContent=True[/b] to load weapon models in advance and have no lags during the game. In some cases (usually if there is a lot of custom content), enabling preload can cause models to disappear. It is recommended to test how this setting affects the game for your server configuration and then decide whether to enable preloading or not.
 
@@ -64,7 +74,7 @@ Unfortunately I can't do anything about it because it's a game problem (not muta
 [*][b]False[/b] - disable DLC unlock.
 [*][b]ReplaceFilter[/b] - changes the trader filter allowing you to buy original DLC weapons without restrictions, unlocks future DLCs as well (no need to update this mutator). However, it replaces the - [b]KFGFxMoviePlayer_Manager[/b] class so it may not be compatible with mods that also replace it.
 [*][b]ReplaceWeapons[/b] - replaces DLC weapons with their unlocked variants. Compatible with any mods, but may require a CTI update after the release of new DLC weapons.
-[*][b]True[/b] or [b]Auto[/b] - selects the most appropriate option automatically. Recommend putting CTIMut last in the mutator load queue if you use this.
+[*][b]True[/b] or [b]Auto[/b] - selects the most appropriate option automatically. Recommend putting CTI.Mut last in the mutator load queue if you use this.
 [/list]
 
 [*]Use [b][CTI.RemoveItems][/b] to remove items from the trader inventory.

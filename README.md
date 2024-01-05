@@ -8,14 +8,16 @@
 [![GitHub](https://img.shields.io/github/license/GenZmeY/KF2-CustomTraderInventory)](LICENSE)
 
 ## Description
-Add/Remove Items in the Trader's Inventory  
+Trader inventory management  
 
 ## Features
 - remove/add items to trader;
 - can preload weapon models (no lags when buying weapons);
 - unlock DLC weapons;
 - correct items sorting (by price);
-- don't have to worry about adding new guns after each Tripware update.
+- don't have to worry about adding new guns after each Tripware update;
+- add an unlimited number of items to the trader;
+- sell weapons excluded from trader inventory.
 
 ## Usage & Setup
 [See steam workshop page](https://steamcommunity.com/sharedfiles/filedetails/?id=2830826239)
