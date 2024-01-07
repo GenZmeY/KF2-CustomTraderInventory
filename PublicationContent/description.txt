@@ -54,7 +54,7 @@ Unfortunately I can't do anything about it because it's a game problem (not muta
 
 [h1]Setup (KFCTI.ini)[/h1]
 [list]
-[*][b]bDisableItemLimitCheck[/b]: The original game does not support more than 256 trader items, adding items above this limit causes bugs. If this problem is solved (For example, if you are using a mutator that has already fixed this problem or by enabling [b]bApplyPatch[/b]) then it can be set [b]bDisableItemLimitCheck=True[/b] to remove the limit, otherwise it is better to leave it "[b]False[/b]".
+[*][b]bDisableItemLimitCheck[/b]: The original game does not support more than 256 trader items, adding items above this limit causes bugs. If this problem is solved (For example, if you are using a mutator that has already fixed this problem or by enabling [b]bApplyPatch[/b]) then it can be set [b]bDisableItemLimitCheck=True[/b] to remove the limit, otherwise it is better to leave it [b]False[/b].
 
 [*]Set [b]bApplyPatch=True[/b] to fix some base classes of the game: this fixes problems when adding more than 256 items to a trader and will allow players to sell weapons that have been removed from trader inventory. Note that enabling this parameter replaces the following classes: KFAutoPurchaseHelper, KFInventoryManager, KFGFxMenu_Trader, KFGFxObject_TraderItems. There may be compatibility issues with mutators that also replace them.
 
