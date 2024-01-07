@@ -215,7 +215,7 @@ private function PostInit()
 		ServerPatch();
 	}
 
-	Trader.static.OverwriteTraderItems(KFGRI, WeapDefs, LogLevel);
+	Trader.static.OverwriteTraderItems(KFGRI, WeapDefs, bApplyPatch, LogLevel);
 
 	`Log_Info("Trader items:" @ WeapDefs.Length);
 
@@ -257,16 +257,21 @@ private function ServerPatch()
 		}
 	}
 
+	if (KFGRI.TraderItems.class != class'KFGFxObject_TraderItems')
+	{
+		`Log_Warn("Custom TraderItems detected:" @ String(KFGRI.TraderItems.class) $ ". There may be compatibility issues.");
+	}
+
 	AutoPurchaseHelper = class<KFPlayerController>(KFGI.PlayerControllerClass).default.PurchaseHelperClass;
 	if (AutoPurchaseHelper != class'KFPlayerController'.default.PurchaseHelperClass)
 	{
-		`Log_Warn("Custom PurchaseHelperClass detected:" @ String(AutoPurchaseHelper) $ ". There may be compatibility issues.");
+		`Log_Warn("Custom PurchaseHelper detected:" @ String(AutoPurchaseHelper) $ ". There may be compatibility issues.");
 	}
 
 	InventoryManager = class<KFInventoryManager>(KFGI.DefaultPawnClass.default.InventoryManagerClass);
 	if (InventoryManager != class'KFPawn'.default.InventoryManagerClass)
 	{
-		`Log_Warn("Custom InventoryManagerClass detected:" @ String(InventoryManager) $ ". There may be compatibility issues.");
+		`Log_Warn("Custom InventoryManager detected:" @ String(InventoryManager) $ ". There may be compatibility issues.");
 	}
 }
 

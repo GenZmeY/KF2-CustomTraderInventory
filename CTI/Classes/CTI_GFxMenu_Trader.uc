@@ -155,9 +155,7 @@ public function Callback_BuyOrSellItem()
 		}
 		else
 		{
-			`log("Callback_BuyOrSellItem: SelectedItemIndex="$SelectedItemIndexInt, MyKFIM.bLogInventory);
 			ItemInfo = OwnedItemList[SelectedItemIndexInt];
-			`log("Callback_BuyOrSellItem: ItemInfo="$ItemInfo.DefaultItem.ClassName, MyKFIM.bLogInventory);
 			MyKFPC.GetPurchaseHelper().SellWeapon(ItemInfo, SelectedItemIndexInt);
 
 			SetNewSelectedIndex(OwnedItemList.length);

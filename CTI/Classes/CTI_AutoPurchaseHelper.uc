@@ -248,7 +248,11 @@ public function SetWeaponInformation(KFWeapon KFW)
 {
 	local int i;
 
-	GetCTI_TraderItems();
+	if (GetCTI_TraderItems() == None)
+	{
+		Super.SetWeaponInformation(KFW);
+		return;
+	}
 
 	for (i = 0; i < CTI_TraderItems.AllItems.Length; i++)
 	{

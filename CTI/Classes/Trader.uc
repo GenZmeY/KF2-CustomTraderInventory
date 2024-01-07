@@ -152,6 +152,7 @@ public static simulated function Array< class<KFWeaponDefinition> > GenerateWeap
 public static simulated function OverwriteTraderItems(
 	KFGameReplicationInfo KFGRI,
 	const out Array<class<KFWeaponDefinition> > WeapDefs,
+	bool ApplyPatch,
 	E_LogLevel LogLevel)
 {
 	local CTI_GFxObject_TraderItems TraderItemsCTI;
@@ -188,7 +189,14 @@ public static simulated function OverwriteTraderItems(
 	TraderItemsCTI.SetItemsInfo(TraderItemsCTI.SaleItems);
 	TraderItemsCTI.SetItemsInfo(TraderItemsCTI.AllItems);
 
-	KFGRI.TraderItems = TraderItemsCTI;
+	if (ApplyPatch)
+	{
+		KFGRI.TraderItems = TraderItemsCTI;
+	}
+	else
+	{
+		KFGRI.TraderItems.SaleItems = TraderItemsCTI.SaleItems;
+	}
 }
 
 private static function bool WeaponClassIsUnique(String WeaponClassPath, const out Array<class<KFWeaponDefinition> > WeapDefs, E_LogLevel LogLevel)

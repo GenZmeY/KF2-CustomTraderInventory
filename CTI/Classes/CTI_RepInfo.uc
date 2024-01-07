@@ -179,7 +179,7 @@ private simulated function Finished()
 	if (KFGRI != None)
 	{
 		`Log_Debug("Finished: Trader.static.OverwriteTraderItems");
-		Trader.static.OverwriteTraderItems(KFGRI, RepArray, LogLevel);
+		Trader.static.OverwriteTraderItems(KFGRI, RepArray, PatchRequired, LogLevel);
 		`Log_Info("Trader items successfully synchronized!");
 	}
 	else
