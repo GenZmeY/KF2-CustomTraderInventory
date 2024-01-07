@@ -11,7 +11,7 @@ Trader inventory management
 [*]correct items sorting (by price);
 [*]don't have to worry about adding new guns after each KF2 update;
 [*]add an unlimited number of items to the trader;
-[*]sell weapons excluded from trader inventory.
+[*]players can sell weapons excluded from trader inventory.
 [/list]
 
 [h1]Whitelisted?[/h1]
@@ -47,23 +47,16 @@ Version=0[/b]
 [*]Add mutator to server start parameters: [b]?Mutator=CTI.Mut[/b] and restart the server.
 [/olist]
 
-[h1][b](*)[/b] Buggy variable initialization[/h1]
-The config should be created on first start, but now the game contains a bug that initializes the config values ​​randomly if they are not explicitly set.Thus, the config may have incorrect values ​​or not be created at all. So if you are using this mutator for the first time, I highly recommend doing the following:
-[olist]
-[*]Create (modify) [b]KFCTI.ini[/b] manually. Put the following content there:
-[b][CTI.CTI]
-Version=0[/b]
-[*]Start the game/server with CTI to generate the contents of the config.
-[*]Close the game/server.
-[/olist]
-[b]Right now this is the only way to correctly create the default config.[/b]
+[h1][b](*)[/b] Buggy config variables initialization[/h1]
+CTI, like many other mutators, initializes the config by relying on the unreal script feature which uses default values for each data type that is not explicitly specified. For the int type (which is used to store the config version) this is zero - detecting zero allows to understand that the mutator is being used for the first time (which means it's need to generate a config). But now the game contains a bug that initializes the config values ​​randomly if they are not explicitly set. Thus, the config may have incorrect values ​​or not be created at all. This is why I recommend explicitly set Version=0 in the config for the first time.
+
 Unfortunately I can't do anything about it because it's a game problem (not mutator). I hope TWI fixes this someday.
 
 [h1]Setup (KFCTI.ini)[/h1]
 [list]
 [*][b]bDisableItemLimitCheck[/b]: The original game does not support more than 256 trader items, adding items above this limit causes bugs. If this problem is solved (For example, if you are using a mutator that has already fixed this problem or by enabling [b]bApplyPatch[/b]) then it can be set [b]bDisableItemLimitCheck=True[/b] to remove the limit, otherwise it is better to leave it "[b]False[/b]".
 
-[*]Set [b]bApplyPatch=True[/b] to fix some base classes of the game: this fixes problems when adding more than 256 items to a trader and will allow weapons that have been removed from sale to be sold. Note that enabling this parameter replaces the following classes: KFAutoPurchaseHelper, KFInventoryManager, KFGFxMenu_Trader, KFGFxObject_TraderItems. There may be compatibility issues with mutators that also replace them.
+[*]Set [b]bApplyPatch=True[/b] to fix some base classes of the game: this fixes problems when adding more than 256 items to a trader and will allow players to sell weapons that have been removed from trader inventory. Note that enabling this parameter replaces the following classes: KFAutoPurchaseHelper, KFInventoryManager, KFGFxMenu_Trader, KFGFxObject_TraderItems. There may be compatibility issues with mutators that also replace them.
 
 [*]Set [b]bPreloadContent=True[/b] to load weapon models in advance and have no lags during the game. In some cases (usually if there is a lot of custom content), enabling preload can cause models to disappear. It is recommended to test how this setting affects the game for your server configuration and then decide whether to enable preloading or not.
 
@@ -88,11 +81,10 @@ example: [b]Item=KFGame.KFWeapDef_Mac10[/b] will remove MAC10 from sale.
 example: [b]Item=WeaponPackExt.KFWeapDef_XM25[/b] will add [url=https://steamcommunity.com/sharedfiles/filedetails/?id=1147408497]XM25[/url] to sale.
 [/list]
 
-❗️ Note that if you need an empty list anywhere (for example, you don't want to delete some of the traders's weapons), leave at least one line there:
-[b]Item=[/b]
-This is necessary to explicitly initialize the list (because of the bug I wrote about above) to avoid initialization with random values.
-
 [h1]Notes[/h1]
+📌 If you need an empty list anywhere (for example, you don't want to delete some of the traders's weapons), leave at least one line there:
+[b]Item=[/b]
+This is necessary to explicitly initialize the list (because of the bug I wrote about above) to avoid initialization with incorrect values.
 📌 Mutator does not contain custom weapons. You must have the required weapon packs in your subscriptions to be able to add them to the trader.
 📌 If you are using this mutator to add weapons, you should [b]not[/b] use mutators from weapon packs (just having them in subscriptions is enough).
 
