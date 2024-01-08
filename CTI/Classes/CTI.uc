@@ -230,6 +230,7 @@ private function PostInit()
 	{
 		if (RepInfo.PendingSync)
 		{
+			RepInfo.PrepareSync(Self, LogLevel, KFGI.KFGFxManagerClass, DLCSkinUpdateRequired.Value, bApplyPatch);
 			RepInfo.Replicate(WeapDefs);
 		}
 	}
@@ -348,12 +349,11 @@ public function bool CreateRepInfo(Controller C)
 
 	if (RepInfo == None) return false;
 
-	RepInfo.PrepareSync(Self, KFPlayerController(C), LogLevel, DLCSkinUpdateRequired.Value, bApplyPatch);
-
 	RepInfos.AddItem(RepInfo);
 
 	if (ReadyToSync)
 	{
+		RepInfo.PrepareSync(Self, LogLevel, KFGI.KFGFxManagerClass, DLCSkinUpdateRequired.Value, bApplyPatch);
 		RepInfo.Replicate(WeapDefs);
 	}
 	else

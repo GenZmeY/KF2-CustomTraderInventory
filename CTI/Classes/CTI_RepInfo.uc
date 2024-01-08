@@ -23,6 +23,8 @@ var public  bool PendingSync;
 var private CTI CTI;
 var private E_LogLevel LogLevel;
 
+var private class<KFGFxMoviePlayer_Manager> FrontEndClass;
+
 var private GameReplicationInfo     GRI;
 var private KFPlayerController      KFPC;
 var private KFPlayerReplicationInfo KFPRI;
@@ -49,7 +51,7 @@ var private bool ClientReady, ServerReady;
 replication
 {
 	if (bNetInitial && Role == ROLE_Authority)
-		LogLevel, SkinUpdateRequired, PatchRequired;
+		LogLevel, SkinUpdateRequired, PatchRequired, FrontEndClass;
 }
 
 public simulated function bool SafeDestroy()
@@ -60,16 +62,40 @@ public simulated function bool SafeDestroy()
 }
 
 public function PrepareSync(
-	CTI _CTI, KFPlayerController _KFPC, E_LogLevel _LogLevel,
+	CTI _CTI, E_LogLevel _LogLevel,
+	class<KFGFxMoviePlayer_Manager> _FrontEndClass,
 	bool _SkinUpdateRequired, bool _PatchRequired)
 {
 	`Log_Trace();
 
 	CTI                      = _CTI;
-	KFPC                     = _KFPC;
 	LogLevel                 = _LogLevel;
+	FrontEndClass            = _FrontEndClass;
 	SkinUpdateRequired       = _SkinUpdateRequired;
 	PatchRequired            = _PatchRequired;
+}
+
+private reliable client function ClientSetFrontEnd()
+{
+	if (FrontEndClass == None || GetKFPRI() == None)
+	{
+		`Log_Debug("Wait for frontend");
+		SetTimer(1.0f, false, nameof(ClientSetFrontEnd));
+		return;
+	}
+
+	if (KFPC.MyGFxManager != None && KFPC.MyGFxManager.class == FrontEndClass)
+	{
+		`Log_Debug("MyGFxManager is ok:" @ String(KFPC.MyGFxManager.class));
+		return;
+	}
+
+	KFPC.MyGFxManager.CloseMenus(true);
+	KFPC.MyGFxManager = None;
+
+	KFPC.ClientSetFrontEnd(FrontEndClass, KFPRI.bOnlySpectator);
+
+	`Log_Debug(String(FrontEndClass) @ "initialized.");
 }
 
 public function Replicate(const out Array<class<KFWeaponDefinition> > WeapDefs)
@@ -77,6 +103,8 @@ public function Replicate(const out Array<class<KFWeaponDefinition> > WeapDefs)
 	`Log_Trace();
 
 	ServerReady = !PatchRequired;
+
+	ClientSetFrontEnd();
 
 	if (PatchRequired)
 	{
@@ -92,13 +120,14 @@ public function Replicate(const out Array<class<KFWeaponDefinition> > WeapDefs)
 	RepArray = WeapDefs;
 	RepData.Size = RepArray.Length;
 
-	if (WorldInfo.NetMode == NM_StandAlone)
+	if (WorldInfo.NetMode != NM_StandAlone)
 	{
-		Progress(RepArray.Length, RepArray.Length);
-		return;
+		Sync();
 	}
-
-	Sync();
+	else
+	{
+		Finished();
+	}
 }
 
 private reliable server function Sync()
@@ -179,7 +208,10 @@ private simulated function Finished()
 	if (KFGRI != None)
 	{
 		`Log_Debug("Finished: Trader.static.OverwriteTraderItems");
-		Trader.static.OverwriteTraderItems(KFGRI, RepArray, PatchRequired, LogLevel);
+		if (WorldInfo.NetMode != NM_StandAlone)
+		{
+			Trader.static.OverwriteTraderItems(KFGRI, RepArray, PatchRequired, LogLevel);
+		}
 		`Log_Info("Trader items successfully synchronized!");
 	}
 	else

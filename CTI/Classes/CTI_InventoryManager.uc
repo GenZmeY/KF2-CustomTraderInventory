@@ -137,7 +137,7 @@ public reliable server function CTI_ServerBuyWeapon(int ItemIndex, optional int 
 	if (CurrentCarryBlocks > CurrentCarryBlocks + BlocksRequired) return;
 	if (!CTI_ProcessWeaponDosh(PurchasedItem))                        return;
 
-	CTI_AddTransactionItem( PurchasedItem, WeaponUpgrade);
+	CTI_AddTransactionItem(PurchasedItem, WeaponUpgrade);
 }
 
 // final function AddTransactionItem( const out STraderItem ItemToAdd, optional byte WeaponUpgrade )
