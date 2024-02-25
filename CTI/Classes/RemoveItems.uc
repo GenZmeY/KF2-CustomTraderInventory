@@ -2,7 +2,7 @@ class RemoveItems extends Object
 	dependson(CTI)
 	config(CTI);
 
-var public  config bool bAll;
+var public  config bool bALL;
 var public  config bool bHRG;
 var public  config bool bDLC;
 var private config Array<String> Item;
@@ -29,11 +29,11 @@ public static function InitConfig(int Version, int LatestVersion)
 
 private static function ApplyDefault()
 {
-	default.bAll = false;
+	default.bALL = false;
 	default.bHRG = false;
 	default.bDLC = false;
 	default.Item.Length = 0;
-	default.Item.AddItem("KFGame.KFWeapDef_9mmDual");
+	default.Item.AddItem("KFGame.SomeWeapon");
 }
 
 public static function Array<class<KFWeaponDefinition> > Load(E_LogLevel LogLevel)
@@ -45,7 +45,7 @@ public static function Array<class<KFWeaponDefinition> > Load(E_LogLevel LogLeve
 	local int    Line;
 
 	`Log_Info("Load items to remove:");
-	if (default.bAll)
+	if (default.bALL)
 	{
 		`Log_Info("Remove all default items");
 	}

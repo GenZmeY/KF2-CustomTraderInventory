@@ -446,6 +446,12 @@ private reliable server function Cleanup()
 {
 	`Log_Trace();
 
+	if (PatchRequired)
+	{
+		`Log_Debug("Skip cleanup to keep CTI_RepInfo alive");
+		return;
+	}
+
 	`Log_Debug("Cleanup" @ GetKFPC() @ GetKFPRI() == None? "" : GetKFPRI().PlayerName);
 	if (!CTI.DestroyRepInfo(GetKFPC()))
 	{
@@ -466,7 +472,7 @@ public function InitInventoryManager()
 
 	`Log_Trace();
 
-	if (GetKFPRI() == None || !KFPRI.bHasSpawnedIn)
+	if (GetKFPRI() == None || !KFPRI.bHasSpawnedIn || KFPC.Pawn == None)
 	{
 		`Log_Debug("Wait for spawn (InventoryManager)");
 		SetTimer(1.0f, false, nameof(InitInventoryManager));
@@ -477,6 +483,7 @@ public function InitInventoryManager()
 
 	KFPC.Pawn.InventoryManagerClass = InventoryManager;
 	NextInventoryManger = Spawn(KFPC.Pawn.InventoryManagerClass, KFPC.Pawn);
+	CTI_InventoryManager(NextInventoryManger).Initialize(Self);
 
 	if (NextInventoryManger == None)
 	{

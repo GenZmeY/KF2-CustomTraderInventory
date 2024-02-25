@@ -23,8 +23,9 @@ private function CTI_GFxObject_TraderItems GetCTI_TraderItems()
 
 private function CTI_InventoryManager GetCTI_IM()
 {
-	if (CTI_IM == None)
+	if (CTI_IM != Pawn.InvManager)
 	{
+		`Log_Base("Update InvManager:" @ String(CTI_IM) @ "<-" @ String(Pawn.InvManager));
 		CTI_IM = CTI_InventoryManager(Pawn.InvManager);
 	}
 

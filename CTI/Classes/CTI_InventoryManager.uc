@@ -1,5 +1,18 @@
 class CTI_InventoryManager extends KFInventoryManager;
 
+var private CTI_RepInfo RepInfo;
+
+public function Initialize(CTI_RepInfo _RepInfo)
+{
+	RepInfo = _RepInfo;
+}
+
+public function OwnerDied()
+{
+	RepInfo.SetTimer(1.0f, false, nameof(RepInfo.InitInventoryManager));
+	Super.OwnerDied();
+}
+
 // simulated function final BuyAmmo( float AmountPurchased, EItemType ItemType, optional byte ItemIndex, optional bool bSecondaryAmmo )
 public simulated function CTI_BuyAmmo(float AmountPurchased, EItemType ItemType, optional int ItemIndex, optional bool bSecondaryAmmo)
 {
@@ -455,6 +468,35 @@ private reliable server function CTI_ServerBuyGrenade(int AmountPurchased)
 	{
 		AddGrenades(AmountPurchased);
 	}
+}
+
+public simulated function int GetWeaponBlocks(const out STraderItem ShopItem, optional int OverrideLevelValue = INDEX_NONE)
+{
+	local int ItemUpgradeLevel;
+	local KFPlayerController KFPC;
+	local Inventory InventoryItem;
+
+	if (ShopItem.SingleClassName != '' && OverrideLevelValue == INDEX_NONE && ClassNameIsInInventory(ShopItem.SingleClassName, InventoryItem))
+	{
+		ItemUpgradeLevel = KFWeapon(InventoryItem).CurrentWeaponUpgradeIndex;
+	}
+	else
+	{
+		if (OverrideLevelValue != INDEX_NONE)
+		{
+			ItemUpgradeLevel = OverrideLevelValue;
+		}
+		else
+		{
+			KFPC = KFPlayerController(Instigator.Owner);
+			if (KFPC != None)
+			{
+				ItemUpgradeLevel = KFPC.GetPurchaseHelper().GetItemUpgradeLevelByClassName(ShopItem.ClassName);
+			}
+		}
+	}
+
+	return ShopItem.BlocksRequired + (ItemUpgradeLevel > INDEX_NONE ? ShopItem.WeaponUpgradeWeight[ItemUpgradeLevel] : 0);
 }
 
 defaultproperties
