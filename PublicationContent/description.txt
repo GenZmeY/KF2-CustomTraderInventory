@@ -20,15 +20,17 @@ No. This mod is not whitelisted and will de-rank your server. Any XP gained will
 [h1]Usage (single player)[/h1]
 [olist]
 [*]Subscribe to this mutator;
-[*]Start KF2;
 [*]Create a file [b](*)[/b]: [b]C:\Users\<username>\Documents\My Games\KillingFloor2\KFGame\Config\KFCTI.ini[/b]
 with the following content:
 [b][CTI.CTI]
 Version=0[/b]
-[*]Open console (~) and input:
+[*]Start KF2;
+[*]Open console (~) and start any map with CTI (this will generate the default KFCTI.ini content):
 [b]open KF-BioticsLab?Mutator=CTI.Mut[/b]
-(replace the map and add the parameters you need)
-[*]<Enter>.
+[*]Close the game and configure CTI as you need (see the [b]Setup (KFCTI.ini)[/b] section below);
+[*]Start KF2, open the console, start the game:
+[b]open KF-BioticsLab?Mutator=CTI.Mut[/b]
+(replace the map and add the parameters you need).
 [/olist]
 [h1]Usage (server)[/h1]
 [b]Note:[/b] [i]If you don't understand what is written here, read the article [url=https://wiki.killingfloor2.com/index.php?title=Dedicated_Server_(Killing_Floor_2)][u]Dedicated Server (KF2 wiki)[/u][/url] before following these instructions.[/i]
@@ -40,11 +42,14 @@ Version=0[/b]
 [*]Add the following string to the [b][OnlineSubsystemSteamworks.KFWorkshopSteamworks][/b] section (create one if it doesn't exist):
 [b]ServerSubscribedWorkshopItems=2830826239[/b]
 [*]Start the server and wait while the mutator is downloading;
+[*]When the download is complete, close the server;
 [*]Create a file [b](*)[/b]: [b]<kf2-server>\KFGame\Config\KFCTI.ini[/b]
 with the following content:
 [b][CTI.CTI]
 Version=0[/b]
-[*]Add mutator to server start parameters: [b]?Mutator=CTI.Mut[/b] and restart the server.
+[*]Add mutator to server start parameters: [b]?Mutator=CTI.Mut[/b] and start the server (this will generate the default KFCTI.ini content);
+[*]Close the server and configure CTI as you need (see the [b]Setup (KFCTI.ini)[/b] section below);
+[*]Start the server (with [b]?Mutator=CTI.Mut[/b]) again.
 [/olist]
 
 [h1][b](*)[/b] Buggy config variables initialization[/h1]
