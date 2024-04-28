@@ -88,5 +88,8 @@ This is necessary to explicitly initialize the list (because of the bug I wrote 
 📌 Mutator does not contain custom weapons. You must have the required weapon packs in your subscriptions to be able to add them to the trader.
 📌 If you are using this mutator to add weapons, you should [b]not[/b] use mutators from weapon packs (just having them in subscriptions is enough).
 
+[h1]Translators:[/h1]
+[url=https://steamcommunity.com/profiles/76561199126205919]cheungfatzong[/url] - Traditional [CHT] and Simplified [CHN] Chinese.
+
 [h1]Sources[/h1]
 [url=https://github.com/GenZmeY/KF2-CustomTraderInventory]https://github.com/GenZmeY/KF2-CustomTraderInventory[/url] [b](GNU GPLv3)[/b]
